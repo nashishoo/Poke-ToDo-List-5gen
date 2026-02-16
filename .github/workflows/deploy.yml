@@ -26,12 +26,12 @@ jobs:
             echo "❌ index.html missing!"
             exit 1
           fi
-          if [ ! -f "app.js" ]; then
-            echo "❌ app.js missing!"
+          if [ ! -f "js/app.js" ]; then
+            echo "❌ js/app.js missing!"
             exit 1
           fi
-          if [ ! -f "style.css" ]; then
-            echo "❌ style.css missing!"
+          if [ ! -f "css/style.css" ]; then
+            echo "❌ css/style.css missing!"
             exit 1
           fi
           echo "✅ Critical files present"
