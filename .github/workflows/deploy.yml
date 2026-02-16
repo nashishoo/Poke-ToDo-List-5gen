@@ -1,0 +1,37 @@
+name: Deploy Checks
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  pre-deploy-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Verify Branch
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "✅ Branch check passed"
+          else
+             echo "⚠️ Not on main branch"
+          fi
+
+      - name: Check for Critical Files
+        run: |
+          if [ ! -f "index.html" ]; then
+            echo "❌ index.html missing!"
+            exit 1
+          fi
+          if [ ! -f "app.js" ]; then
+            echo "❌ app.js missing!"
+            exit 1
+          fi
+          if [ ! -f "style.css" ]; then
+            echo "❌ style.css missing!"
+            exit 1
+          fi
+          echo "✅ Critical files present"

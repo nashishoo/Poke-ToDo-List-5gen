@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoMon List App</title>
+    <title>ToDoMon List App</title>
+    <!-- Cache buster added for style.css - FORCE RELOAD -->
+    <script>document.write('<link rel="stylesheet" href="style.css?nocache=' + new Date().getTime() + '">');</script>
+    <script>document.write('<link rel="stylesheet" href="habitat-style.css?nocache=' + new Date().getTime() + '">');</script>
+    <noscript>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="habitat-style.css">
+    </noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-section">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/472.png"
+                    alt="Gliscor" class="header-pokemon" id="headerPokemon">
+                <h1>ToDoMon List</h1>
+            </div>
+            <div class="header-right">
+                <button class="dark-mode-btn" id="darkModeBtn" title="Cambiar modo">
+                    <span class="dark-icon">🌙</span>
+                    <span class="light-icon">☀️</span>
+                </button>
+                <div class="trainer-level">
+                    <span class="level-label">Nivel</span>
+                    <span class="level-number" id="trainerLevel">1</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="stat-box">
+                <span class="stat-label">Tareas</span>
+                <span class="stat-value"><span id="completedCount">0</span> / <span id="totalCount">0</span></span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">0%</span>
+            </div>
+        </section>
+
+
+        <!-- Task Lists -->
+        <section class="tasks-section">
+            <!-- Coding Pendiente -->
+            <div class="task-category collapsible" id="gymTasks">
+                <div class="category-header" data-category="gym">
+                    <span class="collapse-icon">▼</span>
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/257.png"
+                        alt="Blaziken" class="category-pokemon">
+                    <div class="category-info">
+                        <h2>💻 Coding Pendiente</h2>
+                        <span class="category-subtitle">Tareas de desarrollo</span>
+                    </div>
+                    <button class="pokeball-btn add-task-btn" data-category="gym" title="Agregar tarea">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png"
+                            alt="Master Ball" class="pokeball-img">
+                    </button>
+                    <span class="task-count" data-category="gym">0</span>
+                </div>
+                <ul class="task-list" id="gymList"></ul>
+            </div>
+
+            <!-- Ideas al Peo -->
+            <div class="task-category collapsible" id="raidTasks">
+                <div class="category-header" data-category="raid">
+                    <span class="collapse-icon">▼</span>
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/248.png"
+                        alt="Tyranitar" class="category-pokemon">
+                    <div class="category-info">
+                        <h2>💡 Ideas al Peo</h2>
+                        <span class="category-subtitle">Brainstorm y creatividad</span>
+                    </div>
+                    <button class="pokeball-btn add-task-btn" data-category="raid" title="Agregar tarea">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png"
+                            alt="Ultra Ball" class="pokeball-img">
+                    </button>
+                    <span class="task-count" data-category="raid">0</span>
+                </div>
+                <ul class="task-list" id="raidList"></ul>
+            </div>
+
+            <!-- Ayuda Memorias -->
+            <div class="task-category collapsible" id="adventureTasks">
+                <div class="category-header" data-category="adventure">
+                    <span class="collapse-icon">▼</span>
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/530.png"
+                        alt="Excadrill" class="category-pokemon">
+                    <div class="category-info">
+                        <h2>📝 Ayuda Memorias</h2>
+                        <span class="category-subtitle">Notas y recordatorios</span>
+                    </div>
+                    <button class="pokeball-btn add-task-btn" data-category="adventure" title="Agregar tarea">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png"
+                            alt="Great Ball" class="pokeball-img">
+                    </button>
+                    <span class="task-count" data-category="adventure">0</span>
+                </div>
+                <ul class="task-list" id="adventureList"></ul>
+            </div>
+        </section>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/178.png"
+                alt="Xatu" class="empty-pokemon">
+            <p>¡Tu equipo está vacío!</p>
+            <span>Agrega tu primera tarea para comenzar tu aventura</span>
+        </div>
+    </div>
+
+    <!-- New Task Modal -->
+    <div class="modal-overlay" id="newTaskModal">
+        <div class="modal-content new-task-modal">
+            <h3 id="newTaskModalTitle">Nueva Tarea</h3>
+            <input type="hidden" id="newTaskCategory" value="gym">
+            <div class="input-group">
+                <input type="text" id="newTaskInput" placeholder="¿Qué misión tienes?" maxlength="100">
+            </div>
+            <div class="description-group">
+                <textarea id="newTaskDescription" placeholder="Descripción (opcional)..." rows="2"></textarea>
+            </div>
+            <div class="subtasks-input-section">
+                <label class="subtasks-label">Sub-tareas:</label>
+                <div class="subtask-chips" id="newTaskSubtaskChips">
+                    <span class="no-subtasks">Sin sub-tareas aún</span>
+                </div>
+                <div class="add-subtask-row">
+                    <input type="text" id="newTaskSubtaskInput" placeholder="Nueva sub-tarea..." maxlength="50">
+                    <button id="newTaskAddSubtaskBtn" class="add-subtask-btn">+</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelNewTask">Cancelar</button>
+                <button class="save-btn" id="saveNewTask">Crear Tarea</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Pokemon Habitat -->
+    <footer class="pokemon-habitat" id="pokemonHabitat">
+        <div class="habitat-bg"></div>
+        <div class="pokemon-team" id="pokemonTeam"></div>
+    </footer>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <h3>Editar Tarea</h3>
+            <input type="text" id="editTaskInput" placeholder="Nombre de la tarea">
+            <textarea id="editTaskDescription" placeholder="Descripción (opcional)" rows="3"></textarea>
+            <div class="subtasks-input-section">
+                <label class="subtasks-label">Sub-tareas:</label>
+                <div class="subtask-chips" id="editTaskSubtaskChips">
+                    <span class="no-subtasks">Sin sub-tareas aún</span>
+                </div>
+                <div class="add-subtask-row">
+                    <input type="text" id="editTaskSubtaskInput" placeholder="Nueva sub-tarea..." maxlength="50">
+                    <button id="editTaskAddSubtaskBtn" class="add-subtask-btn">+</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelEdit">Cancelar</button>
+                <button class="save-btn" id="saveEdit">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
