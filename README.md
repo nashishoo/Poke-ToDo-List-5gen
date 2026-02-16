@@ -1,26 +1,36 @@
 # 🎮 ToDoMon List App
 
-> **Para los amantes de pokemon, una Poke ToDo list!**
+> **Para los amantes de Pokémon, ¡una Poke ToDo list!**
 
 Una aplicación de tareas gamificada donde tus pendientes cobran vida. Cada tarea es un Pokémon que evoluciona a medida que avanzas, transformando tu productividad en una aventura clásica de Pokémon.
 
-![Version](https://img.shields.io/badge/version-5.1-blue)
+![Version](https://img.shields.io/badge/version-5.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
 ## ⚡ Características Principales
 
-Esta no es una lista de tareas ordinaria. Aquí, completas misiones para entrenar a tu equipo:
+Esta no es una lista de tareas ordinaria. Aquí, completas misiones para entrañar a tu equipo:
 
--   **Evolución en Tiempo Real**: Tus tareas comienzan como Pokémon básicos y evolucionan al cumplir subtareas (50% y 100%).
--   **Sistema de Categorías (Tipos)**:
-    -   🐱 **Coding (Gym)**: Para tus desafíos de desarrollo.
-    -   🦖 **Ideas (Raid)**: Espacio para la creatividad (¡con 30% de probabilidad Shiny!).
-    -   🐭 **Memorias (Adventure)**: Recordatorios y notas rápidas.
--   **Modo Noche Inmersivo**: Un cielo estrellado para tus sesiones nocturnas.
--   **Efectos TCG**: Cartas holográficas y sonidos nostálgicos al completar objetivos.
--   **Sin Dependencias**: Funciona directamente en tu navegador.
+-   **Evolución e Items**:
+    -   Las tareas **Urgentes** e **Ideas** evolucionan como Pokémon reales al completar sus subtareas.
+    -   Las tareas de **Algún Día** (Someday) se representan como objetos de aventura (Pokéballs, Piedras Evolutivas).
+-   **Sistema de Categorías Expandido**:
+    -   🔥 **Urgente**: Pokémon de Fuego para máxima prioridad.
+    -   💼 **Trabajo (Gym)**: Retos de gimnasio y batalla.
+    -   🏠 **Personal**: Pokémon amigables y compañeros.
+    -   📚 **Aprendizaje**: Tipo Psíquico para el conocimiento.
+    -   💡 **Ideas**: Creatividad y Legendarios (¡con probabilidad Shiny!).
+    -   🌟 **Algún Día**: Items y objetos especiales.
+-   **Diseño Nostálgico**:
+    -   Fuentes Pixel Art ('Press Start 2P') para la inmersión retro.
+    -   Iconos de acción temáticos: **TM** para editar, **Repel** para borrar, **Rare Candy** para completar.
+    -   Barras de progreso visuales y contadores integrados.
+-   **Experiencia Inmersiva**:
+    -   Efectos de sonido originales (Gritos Pokémon, subir de nivel).
+    -   Modo Noche con cielo estrellado.
+    -   Efectos holográficos estilo TCG.
 
 ## 🚀 Cómo Empezar
 
@@ -34,7 +44,7 @@ No necesitas instalar nada complejo. Es tan simple como abrir una Pokéball.
 
 2.  **Juega:**
     -   Abre el archivo `index.html` en tu navegador favorito.
-    -   *(Opcional)* Para escuchar los "chrys" de los Pokémon, usa un servidor local (debido a políticas del navegador):
+    -   *(Opcional)* Para escuchar los "crys" de los Pokémon y asegurar que todos los recursos carguen correctamente, usa un servidor local:
         ```bash
         npx serve .
         # o
@@ -45,10 +55,10 @@ No necesitas instalar nada complejo. Es tan simple como abrir una Pokéball.
 
 Construido con amor y estándares web puros:
 
--   **HTML5 & CSS3**: Diseño responsivo y animaciones fluidas sin frameworks.
--   **Vanilla JavaScript**: Lógica ligera y rápida.
+-   **HTML5 & CSS3**: Diseño responsivo, animaciones fluidas y variables CSS para temas dinámicos.
+-   **Vanilla JavaScript**: Lógica ligera y rápida sin frameworks pesados.
 -   **PokeAPI**: La fuente de datos para todos los sprites y sonidos.
--   **LocalStorage**: Tus tareas se guardan automáticamente en tu navegador.
+-   **LocalStorage**: Tus tareas y progreso se guardan automáticamente en tu navegador.
 
 ## 🤝 Contribuir
 

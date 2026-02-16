@@ -7,9 +7,66 @@ const TRAINER_KEY = 'todopkmn_trainer_level';
 const DARK_MODE_KEY = 'todopkmn_dark_mode';
 
 const CATEGORIES = {
-    gym: { id: 'gym', name: 'Coding Pendiente', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/257.png', listId: 'gymList' },
-    raid: { id: 'raid', name: 'Ideas al Peo', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/248.png', listId: 'raidList' },
-    adventure: { id: 'adventure', name: 'Ayuda Memorias', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/530.png', listId: 'adventureList' }
+    urgent: {
+        id: 'urgent',
+        name: 'Urgente',
+        emoji: '🔥',
+        subtitle: 'Prioridad máxima',
+        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/257.png',
+        listId: 'urgentList',
+        color: '#E74C3C',
+        ball: 'master-ball'
+    },
+    work: {
+        id: 'work',
+        name: 'Trabajo',
+        emoji: '💼',
+        subtitle: 'Tareas profesionales',
+        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/248.png',
+        listId: 'workList',
+        color: '#3498DB',
+        ball: 'ultra-ball'
+    },
+    personal: {
+        id: 'personal',
+        name: 'Personal',
+        emoji: '🏠',
+        subtitle: 'Hogar y familia',
+        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png',
+        listId: 'personalList',
+        color: '#2ECC71',
+        ball: 'great-ball'
+    },
+    learning: {
+        id: 'learning',
+        name: 'Aprendizaje',
+        emoji: '📚',
+        subtitle: 'Cursos y skills',
+        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/196.png',
+        listId: 'learningList',
+        color: '#9B59B6',
+        ball: 'poke-ball'
+    },
+    ideas: {
+        id: 'ideas',
+        name: 'Ideas',
+        emoji: '💡',
+        subtitle: 'Brainstorm y futuro',
+        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png',
+        listId: 'ideasList',
+        color: '#F39C12',
+        ball: 'ultra-ball'
+    },
+    someday: {
+        id: 'someday',
+        name: 'Algún Día',
+        emoji: '🌟',
+        subtitle: 'Sin prisa',
+        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png',
+        listId: 'somedayList',
+        color: '#95A5A6',
+        ball: 'poke-ball'
+    }
 };
 
 const GYM_EVOLUTIONS = {
@@ -380,6 +437,164 @@ const ASH_POKEMON = [
     599, 600,     // Meloetta, Genesect
 ];
 
+// Fire-type Pokémon (Urgente category)
+const FIRE_TYPES = [
+    // Gen 1
+    4, 5, 6,        // Charmander → Charmeleon → Charizard
+    37, 38,         // Vulpix → Ninetales
+    58, 59,         // Growlithe → Arcanine
+    77, 78,         // Ponyta → Rapidash
+    126,            // Magmar
+    136,            // Flareon
+    146,            // Moltres (Legendary)
+    // Gen 2
+    155, 156, 157,  // Cyndaquil → Quilava → Typhlosion
+    218, 219,       // Slugma → Magcargo
+    228, 229,       // Houndour → Houndoom
+    240,            // Magby
+    244,            // Entei (Legendary)
+    250,            // Ho-Oh (Legendary)
+    // Gen 3
+    255, 256, 257,  // Torchic → Combusken → Blaziken
+    322, 323,       // Numel → Camerupt
+    324,            // Torkoal
+    // Gen 4
+    390, 391, 392,  // Chimchar → Monferno → Infernape
+    467,            // Magmortar
+    485,            // Heatran (Legendary)
+    // Gen 5
+    494,            // Victini (Legendary)
+    498, 499, 500,  // Tepig → Pignite → Emboar
+    513, 514,       // Pansear → Simisear
+    554, 555,       // Darumaka → Darmanitan
+    607, 608, 609,  // Litwick → Lampent → Chandelure
+    631,            // Heatmor
+    636, 637,       // Larvesta → Volcarona
+    643             // Reshiram (Legendary)
+];
+
+// Friendly/Cute Pokémon (Personal category)
+const FRIENDLY_TYPES = [
+    // Gen 1
+    25, 26,         // Pikachu → Raichu
+    35, 36,         // Clefairy → Clefable
+    39, 40,         // Jigglypuff → Wigglytuff
+    113,            // Chansey
+    133, 134, 135, 136, // Eevee → Vaporeon, Jolteon, Flareon
+    // Gen 2
+    172, 173, 174,  // Pichu, Cleffa, Igglybuff
+    175, 176,       // Togepi → Togetic
+    183, 184,       // Marill → Azumarill
+    196, 197,       // Espeon, Umbreon
+    216, 217,       // Teddiursa → Ursaring
+    231,            // Phanpy
+    242,            // Blissey
+    // Gen 3
+    298,            // Azurill
+    300, 301,       // Skitty → Delcatty
+    311, 312,       // Plusle, Minun
+    363, 364, 365,  // Spheal → Sealeo → Walrein
+    // Gen 4
+    403, 404, 405,  // Shinx → Luxio → Luxray
+    417,            // Pachirisu
+    427, 428,       // Buneary → Lopunny
+    438,            // Bonsly
+    439,            // Mime Jr.
+    440,            // Happiny
+    468,            // Togekiss
+    470, 471,       // Leafeon, Glaceon
+    // Gen 5
+    506, 507, 508,  // Lillipup → Herdier → Stoutland
+    531,            // Audino
+    546, 547,       // Cottonee → Whimsicott
+    548, 549,       // Petilil → Lilligant
+    572, 573        // Minccino → Cinccino
+];
+
+// Psychic-type Pokémon (Aprendizaje category)
+const PSYCHIC_TYPES = [
+    // Gen 1
+    63, 64, 65,     // Abra → Kadabra → Alakazam
+    79, 80,         // Slowpoke → Slowbro
+    96, 97,         // Drowzee → Hypno
+    102, 103,       // Exeggcute → Exeggutor
+    121,            // Starmie
+    122,            // Mr. Mime
+    124,            // Jynx
+    150, 151,       // Mewtwo, Mew
+    // Gen 2
+    177, 178,       // Natu → Xatu
+    196,            // Espeon
+    199,            // Slowking
+    201,            // Unown
+    202,            // Wobbuffet
+    203,            // Girafarig
+    238,            // Smoochum
+    251,            // Celebi
+    // Gen 3
+    280, 281, 282,  // Ralts → Kirlia → Gardevoir
+    307, 308,       // Meditite → Medicham
+    325, 326,       // Spoink → Grumpig
+    337, 338,       // Lunatone, Solrock
+    343, 344,       // Baltoy → Claydol
+    358,            // Chimecho
+    360,            // Wynaut
+    374, 375, 376,  // Beldum → Metang → Metagross
+    380, 381,       // Latias, Latios
+    385, 386,       // Jirachi, Deoxys
+    // Gen 4
+    433,            // Chingling
+    436, 437,       // Bronzor → Bronzong
+    439,            // Mime Jr.
+    475,            // Gallade
+    480, 481, 482,  // Uxie, Mesprit, Azelf
+    488,            // Cresselia
+    // Gen 5
+    494,            // Victini
+    517, 518,       // Munna → Musharna
+    527, 528,       // Woobat → Swoobat
+    561,            // Sigilyph
+    574, 575, 576,  // Gothita → Gothorita → Gothitelle
+    577, 578, 579,  // Solosis → Duosion → Reuniclus
+    605, 606,       // Elgyem → Beheeyem
+    648             // Meloetta
+];
+
+// Extended Legendary Pokémon (5+ subtasks)
+const LEGENDARY_POKEMON_EXTENDED = [
+    // Gen 1
+    144, 145, 146,  // Articuno, Zapdos, Moltres
+    150, 151,       // Mewtwo, Mew
+    // Gen 2
+    243, 244, 245,  // Raikou, Entei, Suicune
+    249, 250,       // Lugia, Ho-Oh
+    251,            // Celebi
+    // Gen 3
+    377, 378, 379,  // Regirock, Regice, Registeel
+    380, 381,       // Latias, Latios
+    382, 383, 384,  // Kyogre, Groudon, Rayquaza
+    385, 386,       // Jirachi, Deoxys
+    // Gen 4
+    480, 481, 482,  // Uxie, Mesprit, Azelf
+    483, 484,       // Dialga, Palkia
+    485,            // Heatran
+    486,            // Regigigas
+    487,            // Giratina
+    488,            // Cresselia
+    489, 490,       // Phione, Manaphy
+    491,            // Darkrai
+    492,            // Shaymin
+    493,            // Arceus
+    // Gen 5
+    494,            // Victini
+    638, 639, 640,  // Cobalion, Terrakion, Virizion
+    641, 642, 645,  // Tornadus, Thundurus, Landorus
+    643, 644, 646,  // Reshiram, Zekrom, Kyurem
+    647,            // Keldeo
+    648,            // Meloetta
+    649             // Genesect
+];
+
 const ADVENTURE_ITEMS = [
     { id: 'masterball', name: 'Master Ball', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png' },
     { id: 'ultraball', name: 'Ultra Ball', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png' },
@@ -396,25 +611,60 @@ const LEGENDARY_POKEMON = [
 
 function getEvolutionChain(category, subtaskCount) {
     const now = Date.now();
-    let chain, isItem = category === 'adventure', isShiny = false;
+    let chain, isItem = false, isShiny = false, noEvolution = false;
 
+    // CASE 1: 5+ subtasks -> Legendary Pokemon
     if (subtaskCount >= 5) {
-        chain = LEGENDARY_POKEMON;
-    } else if (category === 'gym') {
+        const legendaryIndex = now % LEGENDARY_POKEMON_EXTENDED.length;
+        chain = [LEGENDARY_POKEMON_EXTENDED[legendaryIndex]];
+        isShiny = category === 'ideas' && Math.random() < 0.3;
+        return { chain, isItem: false, isShiny, category, noEvolution: false };
+    }
+
+    // CASE 2: No subtasks -> Basic Pokemon (no evolution)
+    if (subtaskCount === 0) {
+        if (category === 'someday') {
+            const itemIndex = now % ADVENTURE_ITEMS.length;
+            return {
+                chain: [ADVENTURE_ITEMS[itemIndex]],
+                isItem: true,
+                isShiny: false,
+                category,
+                noEvolution: true
+            };
+        }
+
+        const pool = getCategoryPokemonPool(category);
+        const basicIndex = (now + 7) % pool.length;
+        const basicPokemon = pool[basicIndex];
+
+        return {
+            chain: [basicPokemon],
+            isItem: false,
+            isShiny: category === 'ideas' && Math.random() < 0.3,
+            category,
+            noEvolution: true
+        };
+    }
+
+    // CASE 3: 1-4 subtasks -> Evolution chain
+    if (category === 'someday') {
+        isItem = true;
+        const items = [];
+        const startIndex = now % ADVENTURE_ITEMS.length;
+        for (let i = 0; i < Math.min(3, subtaskCount + 1); i++) {
+            items.push(ADVENTURE_ITEMS[(startIndex + i) % ADVENTURE_ITEMS.length]);
+        }
+        chain = items;
+    } else if (category === 'work') {
         const keys = Object.keys(GYM_EVOLUTIONS);
         chain = GYM_EVOLUTIONS[keys[(now + subtaskCount) % keys.length]];
-    } else if (category === 'raid') {
-        // Pokémon de Ash - seleccionar aleatorio de la lista
+    } else if (category === 'ideas') {
         const randomIndex = (now + subtaskCount) % ASH_POKEMON.length;
         const pokemonId = ASH_POKEMON[randomIndex];
-
-        // 30% chance de ser shiny
         isShiny = Math.random() < 0.3;
 
-        // Buscar cadena evolutiva para este Pokémon o usarlo solo
-        chain = [pokemonId]; // Por defecto solo ese Pokémon
-
-        // Intentar encontrar cadena evolutiva completa
+        chain = [pokemonId];
         for (const key in GYM_EVOLUTIONS) {
             const evoChain = GYM_EVOLUTIONS[key];
             if (evoChain.includes(pokemonId)) {
@@ -423,15 +673,41 @@ function getEvolutionChain(category, subtaskCount) {
             }
         }
     } else {
-        const startIndex = now % ADVENTURE_ITEMS.length;
-        const items = [];
-        for (let i = 0; i < Math.min(3, subtaskCount + 1); i++) {
-            items.push(ADVENTURE_ITEMS[(startIndex + i) % ADVENTURE_ITEMS.length]);
-        }
-        return { chain: items, isItem: true, isShiny: false, category: 'adventure' };
+        chain = getEvolutionChainFromPool(category, now, subtaskCount);
     }
 
-    return { chain: chain, isItem: isItem, isShiny: isShiny, category: category };
+    return { chain, isItem, isShiny, category, noEvolution: false };
+}
+
+// NEW HELPER: Get category-specific Pokemon pool
+function getCategoryPokemonPool(category) {
+    const pools = {
+        urgent: FIRE_TYPES,
+        work: Object.values(GYM_EVOLUTIONS).flat(),
+        personal: FRIENDLY_TYPES,
+        learning: PSYCHIC_TYPES,
+        ideas: ASH_POKEMON,
+        someday: ADVENTURE_ITEMS
+    };
+    return pools[category] || FIRE_TYPES;
+}
+
+// NEW HELPER: Get evolution chain from pool
+function getEvolutionChainFromPool(category, seed, subtaskCount) {
+    const pool = getCategoryPokemonPool(category);
+
+    const possibleChains = [];
+    Object.values(GYM_EVOLUTIONS).forEach(function (chain) {
+        if (pool.includes(chain[0])) {
+            possibleChains.push(chain);
+        }
+    });
+
+    if (possibleChains.length > 0) {
+        return possibleChains[(seed + subtaskCount) % possibleChains.length];
+    }
+
+    return [pool[seed % pool.length]];
 }
 
 function getEvolutionStage(evolutionData, completedCount, totalCount) {
@@ -498,8 +774,8 @@ const AudioSystem = {
     }
 };
 
-let currentCategory = 'gym';
-let tasks = { gym: [], raid: [], adventure: [] };
+let currentCategory = 'urgent';
+let tasks = { urgent: [], work: [], personal: [], learning: [], ideas: [], someday: [] };
 let trainerLevel = 1;
 let editingTaskId = null;
 let darkMode = false;
@@ -795,10 +1071,10 @@ function openEditModal(category, taskId) {
     editingTaskId = { category: category, taskId: taskId };
     document.getElementById('editTaskInput').value = task.title;
     document.getElementById('editTaskDescription').value = task.description || '';
-    
+
     // Render subtasks in edit modal
     renderEditModalSubtasks(task);
-    
+
     document.getElementById('editModal').classList.add('visible');
     setTimeout(function () { document.getElementById('editTaskInput').focus(); }, 100);
 }
@@ -807,7 +1083,7 @@ let editModalSubtasks = [];
 
 function renderEditModalSubtasks(task) {
     editModalSubtasks = task.subtasks ? [...task.subtasks] : [];
-    
+
     const container = document.getElementById('editTaskSubtaskChips');
     if (!container) {
         // Create container if doesn't exist
@@ -824,20 +1100,20 @@ function renderEditModalSubtasks(task) {
                 </div>
             `;
             descriptionGroup.after(subtaskSection);
-            
+
             // Add event listeners
             document.getElementById('editTaskAddSubtaskBtn').addEventListener('click', addEditTaskSubtask);
-            document.getElementById('editTaskSubtaskInput').addEventListener('keypress', function(e) {
+            document.getElementById('editTaskSubtaskInput').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') addEditTaskSubtask();
             });
         }
     }
-    
+
     const chipsContainer = document.getElementById('editTaskSubtaskChips');
     if (editModalSubtasks.length === 0) {
         chipsContainer.innerHTML = '<span class="no-subtasks">Sin sub-tareas aún</span>';
     } else {
-        chipsContainer.innerHTML = editModalSubtasks.map(function(subtask, index) {
+        chipsContainer.innerHTML = editModalSubtasks.map(function (subtask, index) {
             return '<div class="subtask-chip" data-id="' + subtask.id + '">' +
                 '<span>' + escapeHTML(subtask.title) + '</span>' +
                 '<button class="chip-delete" onclick="removeEditTaskSubtask(\'' + subtask.id + '\')">×</button>' +
@@ -850,7 +1126,7 @@ function addEditTaskSubtask() {
     const input = document.getElementById('editTaskSubtaskInput');
     const title = input.value.trim();
     if (!title) return;
-    
+
     editModalSubtasks.push({ id: generateId(), title: title, completed: false });
     input.value = '';
     renderEditModalSubtasksChips();
@@ -858,18 +1134,18 @@ function addEditTaskSubtask() {
 }
 
 function removeEditTaskSubtask(id) {
-    editModalSubtasks = editModalSubtasks.filter(function(s) { return s.id !== id; });
+    editModalSubtasks = editModalSubtasks.filter(function (s) { return s.id !== id; });
     renderEditModalSubtasksChips();
 }
 
 function renderEditModalSubtasksChips() {
     const container = document.getElementById('editTaskSubtaskChips');
     if (!container) return;
-    
+
     if (editModalSubtasks.length === 0) {
         container.innerHTML = '<span class="no-subtasks">Sin sub-tareas aún</span>';
     } else {
-        container.innerHTML = editModalSubtasks.map(function(subtask) {
+        container.innerHTML = editModalSubtasks.map(function (subtask) {
             return '<div class="subtask-chip" data-id="' + subtask.id + '">' +
                 '<span>' + escapeHTML(subtask.title) + '</span>' +
                 '<button class="chip-delete" onclick="removeEditTaskSubtask(\'' + subtask.id + '\')">×</button>' +
@@ -896,27 +1172,27 @@ function saveEdit() {
     if (taskIndex !== -1) {
         tasks[editingTaskId.category][taskIndex].title = newTitle;
         tasks[editingTaskId.category][taskIndex].description = newDescription;
-        
+
         // Save subtasks from edit modal
         const oldSubtaskCount = tasks[editingTaskId.category][taskIndex].subtasks.length;
         tasks[editingTaskId.category][taskIndex].subtasks = [...editModalSubtasks];
-        
+
         // If subtask count changed, regenerate evolution data
         if (editModalSubtasks.length !== oldSubtaskCount) {
             const task = tasks[editingTaskId.category][taskIndex];
             task.evolutionData = getEvolutionChain(editingTaskId.category, editModalSubtasks.length);
-            
+
             // Update current pokemon/item based on progress
             const completedCount = task.subtasks.filter(s => s.completed).length;
             const evolution = getEvolutionStage(task.evolutionData, completedCount, editModalSubtasks.length);
-            
+
             if (task.evolutionData.isItem) {
                 task.currentItem = evolution.item;
             } else {
                 task.currentPokemonId = evolution.pokemonId;
             }
         }
-        
+
         saveData();
         renderTasks(editingTaskId.category);
         updateStats();
@@ -988,68 +1264,107 @@ function createTaskHTML(category, task) {
     if (task.completed || isFullyCompleted) taskClass += ' completed';
     if (hasSubtasks && isFullyCompleted) taskClass += ' task-complete shiny-complete';
 
-    // Pokemon/Item mascot (Removed old progress-badge)
-    let mascotHTML = '';
-    if (hasSubtasks) {
-        if (task.evolutionData && task.evolutionData.isItem && task.currentItem) {
-            mascotHTML = '<div class="task-mascot">' +
-                '<img src="' + task.currentItem.sprite + '" alt="' + task.currentItem.name + '" class="mascot-sprite mascot-item">' +
-                '</div>';
-        } else if (task.evolutionData) {
-            const pokemonId = task.currentPokemonId || task.evolutionData.chain[0];
-            const spriteUrl = task.evolutionData.isShiny ? getShinySpriteUrl(pokemonId) : getPokemonSpriteUrl(pokemonId);
-            const shinyClass = task.evolutionData.isShiny ? ' shiny' : '';
-            mascotHTML = '<div class="task-mascot' + shinyClass + '">' +
-                '<img src="' + spriteUrl + '" alt="Pokemon" class="mascot-sprite">' +
-                '</div>';
-        }
+    // TASK 1: Pokemon mascot sprite
+    let pokemonSpriteHTML = '';
+    const validPokemonId = task.currentPokemonId || (task.evolutionData && !task.evolutionData.isItem ? task.evolutionData.chain[0] : null);
+
+    if (validPokemonId && !task.evolutionData.isItem) {
+        const spriteUrl = task.evolutionData.isShiny
+            ? getShinySpriteUrl(validPokemonId)
+            : getPokemonSpriteUrl(validPokemonId);
+
+        pokemonSpriteHTML = `
+            <div class="pokemon-mascot ${task.evolutionData.isShiny ? 'shiny' : ''}">
+                <img src="${spriteUrl}" alt="Pokemon ${validPokemonId}" class="mascot-sprite">
+            </div>
+        `;
+    } else if (task.evolutionData && task.evolutionData.isItem && task.currentItem) {
+        pokemonSpriteHTML = `
+            <div class="pokemon-mascot item">
+                <img src="${task.currentItem.sprite}" alt="${task.currentItem.name}" class="mascot-sprite mascot-item">
+            </div>
+        `;
     }
 
-    // Checkbox - SOLO si NO hay sub-tareas
+    // TASK 2: Visual Progress Bar for tasks with subtasks
+    let progressBadgeHTML = '';
+    if (hasSubtasks) {
+        progressBadgeHTML = `
+            <div class="task-progress">
+                <div class="progress-bar-mini">
+                    <div class="progress-fill-mini" style="width: ${percentage}%"></div>
+                </div>
+                <span class="progress-text-mini">${completedCount}/${totalCount}</span>
+            </div>
+        `;
+    }
+
+    // Checkbox - Only if no subtasks
     let checkboxHTML = '';
     if (!hasSubtasks) {
-        checkboxHTML = '<div class="task-checkbox ' + (isFullyCompleted ? 'checked' : '') + '"></div>';
+        checkboxHTML = `<div class="task-checkbox ${isFullyCompleted ? 'checked' : ''}"></div>`;
     }
 
-    // Progress Bar Generation
-    let progressHTML = '';
-    if (hasSubtasks) {
-        progressHTML = '<div class="mission-progress-container">' +
-            '<div class="mission-progress-bar">' +
-            '<div class="mission-progress-fill" style="width: ' + percentage + '%"></div>' +
-            '</div>' +
-            '<span class="mission-progress-text">' + completedCount + '/' + totalCount + '</span>' +
-            '</div>';
-    }
-
-    // Sub-tareas
+    // Subtasks HTML
     let subtasksHTML = '';
     if (hasSubtasks) {
         subtasksHTML = '<div class="task-subtasks">';
         task.subtasks.forEach(function (subtask) {
-            subtasksHTML += '<div class="subtask-mini ' + (subtask.completed ? 'completed' : '') + '">' +
-                '<div class="mini-checkbox ' + (subtask.completed ? 'checked' : '') + '" data-subtask-id="' + subtask.id + '"></div>' +
-                '<span>' + escapeHTML(subtask.title) + '</span>' +
-                '</div>';
+            subtasksHTML += `
+                <div class="subtask-mini ${subtask.completed ? 'completed' : ''}">
+                    <div class="mini-checkbox ${subtask.completed ? 'checked' : ''}" data-subtask-id="${subtask.id}"></div>
+                    <span>${escapeHTML(subtask.title)}</span>
+                </div>
+            `;
         });
         subtasksHTML += '</div>';
     }
 
-    return '<li class="' + taskClass + '" data-task-id="' + task.id + '" data-category="' + category + '">' +
-        mascotHTML +
-        checkboxHTML +
-        '<div class="task-content">' +
-        '<div class="task-text task-title">' + escapeHTML(task.title) + '</div>' +
-        progressHTML +
-        (task.description ? '<div class="task-description">' + escapeHTML(task.description) + '</div>' : '') +
-        subtasksHTML +
-        '</div>' +
-        '<div class="task-actions">' +
-        (isFullyCompleted ? '<span class="completion-check">✓</span>' : '') +
-        '<button class="edit-btn" title="Editar">✏️</button>' +
-        '<button class="delete-btn" title="Eliminar">🗑️</button>' +
-        '</div>' +
-        '</li>';
+    // ACTION ICONS: Tm for Edit, Repel for Delete
+    // TM: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-normal.png
+    // Repel: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-repel.png
+
+    // TASK 3: Return Final Structure with Flex Header
+    return `
+        <li class="${taskClass}" 
+            data-task-id="${task.id}" 
+            data-category="${category}">
+            
+            <!-- Checkbox (if no subtasks) -->
+            ${checkboxHTML}
+            
+            <!-- Task content -->
+            <div class="task-content">
+                <div class="task-header-top">
+                    <!-- Title and Actions Row -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                        <div class="task-title" style="margin-bottom: 0;">${escapeHTML(task.title)}</div>
+                        
+                        <!-- Action buttons (Pokemon Item Icons) -->
+                        <div class="task-actions" style="position: static; opacity: 0.8; margin-left: 8px;">
+                            ${isFullyCompleted ? '<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png" class="pixel-icon-img" alt="Done" style="margin-right: 4px;" title="Completado">' : ''}
+                            <button class="action-btn edit-btn" title="Editar (TM)">
+                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-normal.png" class="pixel-icon-img" alt="Edit">
+                            </button>
+                            <button class="action-btn delete-btn" title="Eliminar (Repel)">
+                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-repel.png" class="pixel-icon-img" alt="Delete">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                ${progressBadgeHTML}  <!-- Visual Bar below title -->
+                
+                ${task.description ? `<p class="task-description">${escapeHTML(task.description)}</p>` : ''}
+                
+                <!-- Subtasks -->
+                ${subtasksHTML}
+            </div>
+            
+            <!-- Pokemon mascot -->
+            ${pokemonSpriteHTML}  <!-- BOTTOM RIGHT -->
+        </li>
+    `;
 }
 
 function checkEmptyState() {
@@ -1116,7 +1431,7 @@ function loadData() {
         if (savedTasks) {
             tasks = JSON.parse(savedTasks);
         } else {
-            tasks = { gym: [], raid: [], adventure: [] };
+            tasks = { urgent: [], work: [], personal: [], learning: [], ideas: [], someday: [] };
         }
 
         // Always attempt to repair data, even if empty or just loaded
@@ -1125,7 +1440,7 @@ function loadData() {
         if (savedLevel) trainerLevel = JSON.parse(savedLevel);
     } catch (e) {
         console.error('Error loading data:', e);
-        tasks = { gym: [], raid: [], adventure: [] };
+        tasks = { urgent: [], work: [], personal: [], learning: [], ideas: [], someday: [] };
         trainerLevel = 1;
         // Try to save the clean state to fix persistent crash loops
         saveData();
@@ -1135,13 +1450,30 @@ function loadData() {
 function repairData() {
     let hasChanges = false;
 
-    // Ensure categories exist
-    ['gym', 'raid', 'adventure'].forEach(cat => {
+    // Ensure new categories exist
+    ['urgent', 'work', 'personal', 'learning', 'ideas', 'someday'].forEach(cat => {
         if (!tasks[cat] || !Array.isArray(tasks[cat])) {
             tasks[cat] = [];
             hasChanges = true;
         }
     });
+
+    // Legacy category migration (gym → work, raid → ideas, adventure → someday)
+    if (tasks.gym && tasks.gym.length > 0) {
+        tasks.work = (tasks.work || []).concat(tasks.gym);
+        delete tasks.gym;
+        hasChanges = true;
+    }
+    if (tasks.raid && tasks.raid.length > 0) {
+        tasks.ideas = (tasks.ideas || []).concat(tasks.raid);
+        delete tasks.raid;
+        hasChanges = true;
+    }
+    if (tasks.adventure && tasks.adventure.length > 0) {
+        tasks.someday = (tasks.someday || []).concat(tasks.adventure);
+        delete tasks.adventure;
+        hasChanges = true;
+    }
 
     Object.keys(tasks).forEach(category => {
         tasks[category].forEach(task => {
@@ -1217,10 +1549,10 @@ function setupNewEventListeners() {
     document.getElementById('newTaskSubtaskInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') addNewTaskSubtaskChip();
     });
-    
+
     // Edit Modal - subtasks
     document.getElementById('editTaskAddSubtaskBtn').addEventListener('click', addEditTaskSubtask);
-    document.getElementById('editTaskSubtaskInput').addEventListener('keypress', function(e) {
+    document.getElementById('editTaskSubtaskInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') addEditTaskSubtask();
     });
 }
@@ -1244,9 +1576,12 @@ function openNewTaskModal(category) {
 
     // Configurar modal
     const categoryNames = {
-        gym: '💻 Coding Pendiente',
-        raid: '💡 Ideas al Peo',
-        adventure: '📝 Ayuda Memorias'
+        urgent: '🔥 Urgente',
+        work: '💼 Trabajo',
+        personal: '🏠 Personal',
+        learning: '📚 Aprendizaje',
+        ideas: '💡 Ideas',
+        someday: '🌟 Algún Día'
     };
     document.getElementById('newTaskModalTitle').textContent = 'Nueva ' + categoryNames[category];
     document.getElementById('newTaskCategory').value = category;
@@ -1360,7 +1695,7 @@ function toggleCategoryCollapse(category) {
         collapsedCategories = collapsedCategories.filter(function (c) { return c !== category; });
     }
     localStorage.setItem('todopkmn_collapsed', JSON.stringify(collapsedCategories));
-    
+
     // Update footer position after toggle
     setTimeout(updateFooterPosition, 100);
 }
@@ -1371,11 +1706,11 @@ function updateFooterPosition() {
     const appContainer = document.querySelector('.app-container');
     const footer = document.getElementById('pokemonHabitat');
     if (!appContainer || !footer) return;
-    
+
     const containerBottom = appContainer.getBoundingClientRect().bottom;
     const footerTop = footer.getBoundingClientRect().top;
     const gap = footerTop - containerBottom;
-    
+
     // If there's too much gap, reduce it
     if (gap > 20) {
         footer.style.marginTop = '0px';
@@ -1387,7 +1722,7 @@ function updateFooterPosition() {
 function renderPokemonHabitat() {
     const container = document.getElementById('pokemonTeam');
     if (!container) return;
-    
+
     // Update footer position after rendering
     setTimeout(updateFooterPosition, 100);
 
@@ -1410,6 +1745,7 @@ function renderPokemonHabitat() {
                 saveData();
             }
 
+            // All tasks with Pokémon appear (not just those with subtasks)
             // Si es item, saltar (los items no van al habitat)
             if (task.evolutionData.isItem) {
                 return;
@@ -1665,3 +2001,4 @@ function scrollToTask(category, taskId) {
         }, 2000);
     }
 }
+

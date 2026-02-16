@@ -56,61 +56,118 @@
 
         <!-- Task Lists -->
         <section class="tasks-section">
-            <!-- Coding Pendiente -->
-            <div class="task-category collapsible" id="gymTasks">
-                <div class="category-header" data-category="gym">
+            <!-- 🔥 Urgente -->
+            <div class="task-category collapsible" id="urgentTasks">
+                <div class="category-header" data-category="urgent">
                     <span class="collapse-icon">▼</span>
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/257.png"
                         alt="Blaziken" class="category-pokemon">
                     <div class="category-info">
-                        <h2>💻 Coding Pendiente</h2>
-                        <span class="category-subtitle">Tareas de desarrollo</span>
+                        <h2>🔥 Urgente</h2>
+                        <span class="category-subtitle">Prioridad máxima</span>
                     </div>
-                    <button class="pokeball-btn add-task-btn" data-category="gym" title="Agregar tarea">
+                    <button class="pokeball-btn add-task-btn" data-category="urgent" title="Agregar tarea">
                         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png"
                             alt="Master Ball" class="pokeball-img">
                     </button>
-                    <span class="task-count" data-category="gym">0</span>
+                    <span class="task-count" data-category="urgent">0</span>
                 </div>
-                <ul class="task-list" id="gymList"></ul>
+                <ul class="task-list" id="urgentList"></ul>
             </div>
 
-            <!-- Ideas al Peo -->
-            <div class="task-category collapsible" id="raidTasks">
-                <div class="category-header" data-category="raid">
+            <!-- 💼 Trabajo -->
+            <div class="task-category collapsible" id="workTasks">
+                <div class="category-header" data-category="work">
                     <span class="collapse-icon">▼</span>
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/248.png"
                         alt="Tyranitar" class="category-pokemon">
                     <div class="category-info">
-                        <h2>💡 Ideas al Peo</h2>
-                        <span class="category-subtitle">Brainstorm y creatividad</span>
+                        <h2>💼 Trabajo</h2>
+                        <span class="category-subtitle">Tareas profesionales</span>
                     </div>
-                    <button class="pokeball-btn add-task-btn" data-category="raid" title="Agregar tarea">
+                    <button class="pokeball-btn add-task-btn" data-category="work" title="Agregar tarea">
                         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png"
                             alt="Ultra Ball" class="pokeball-img">
                     </button>
-                    <span class="task-count" data-category="raid">0</span>
+                    <span class="task-count" data-category="work">0</span>
                 </div>
-                <ul class="task-list" id="raidList"></ul>
+                <ul class="task-list" id="workList"></ul>
             </div>
 
-            <!-- Ayuda Memorias -->
-            <div class="task-category collapsible" id="adventureTasks">
-                <div class="category-header" data-category="adventure">
+            <!-- 🏠 Personal -->
+            <div class="task-category collapsible" id="personalTasks">
+                <div class="category-header" data-category="personal">
                     <span class="collapse-icon">▼</span>
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/530.png"
-                        alt="Excadrill" class="category-pokemon">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
+                        alt="Pikachu" class="category-pokemon">
                     <div class="category-info">
-                        <h2>📝 Ayuda Memorias</h2>
-                        <span class="category-subtitle">Notas y recordatorios</span>
+                        <h2>🏠 Personal</h2>
+                        <span class="category-subtitle">Hogar y familia</span>
                     </div>
-                    <button class="pokeball-btn add-task-btn" data-category="adventure" title="Agregar tarea">
+                    <button class="pokeball-btn add-task-btn" data-category="personal" title="Agregar tarea">
                         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png"
                             alt="Great Ball" class="pokeball-img">
                     </button>
-                    <span class="task-count" data-category="adventure">0</span>
+                    <span class="task-count" data-category="personal">0</span>
                 </div>
-                <ul class="task-list" id="adventureList"></ul>
+                <ul class="task-list" id="personalList"></ul>
+            </div>
+
+            <!-- 📚 Aprendizaje -->
+            <div class="task-category collapsible" id="learningTasks">
+                <div class="category-header" data-category="learning">
+                    <span class="collapse-icon">▼</span>
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/196.png"
+                        alt="Espeon" class="category-pokemon">
+                    <div class="category-info">
+                        <h2>📚 Aprendizaje</h2>
+                        <span class="category-subtitle">Cursos y skills</span>
+                    </div>
+                    <button class="pokeball-btn add-task-btn" data-category="learning" title="Agregar tarea">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+                            alt="Poké Ball" class="pokeball-img">
+                    </button>
+                    <span class="task-count" data-category="learning">0</span>
+                </div>
+                <ul class="task-list" id="learningList"></ul>
+            </div>
+
+            <!-- 💡 Ideas -->
+            <div class="task-category collapsible" id="ideasTasks">
+                <div class="category-header" data-category="ideas">
+                    <span class="collapse-icon">▼</span>
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png"
+                        alt="Mew" class="category-pokemon">
+                    <div class="category-info">
+                        <h2>💡 Ideas</h2>
+                        <span class="category-subtitle">Brainstorm y futuro</span>
+                    </div>
+                    <button class="pokeball-btn add-task-btn" data-category="ideas" title="Agregar tarea">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png"
+                            alt="Ultra Ball" class="pokeball-img">
+                    </button>
+                    <span class="task-count" data-category="ideas">0</span>
+                </div>
+                <ul class="task-list" id="ideasList"></ul>
+            </div>
+
+            <!-- 🌟 Algún Día -->
+            <div class="task-category collapsible" id="somedayTasks">
+                <div class="category-header" data-category="someday">
+                    <span class="collapse-icon">▼</span>
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png"
+                        alt="Snorlax" class="category-pokemon">
+                    <div class="category-info">
+                        <h2>🌟 Algún Día</h2>
+                        <span class="category-subtitle">Sin prisa</span>
+                    </div>
+                    <button class="pokeball-btn add-task-btn" data-category="someday" title="Agregar tarea">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+                            alt="Poké Ball" class="pokeball-img">
+                    </button>
+                    <span class="task-count" data-category="someday">0</span>
+                </div>
+                <ul class="task-list" id="somedayList"></ul>
             </div>
         </section>
 
@@ -180,7 +237,11 @@
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <!-- Cache Buster for app.js -->
+    <script>document.write('<script src="js/app.js?v=' + new Date().getTime() + '"><\/script>');</script>
+    <noscript>
+        <script src="js/app.js"></script>
+    </noscript>
 </body>
 
 </html>
