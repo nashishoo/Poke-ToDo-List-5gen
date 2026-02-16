@@ -64,7 +64,6 @@ Construido con amor y estándares web puros:
 
 <div align="center">
 
-**Hecho con ❤️ por**
 
 ### Dolan
 [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nashishoo)
