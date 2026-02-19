@@ -2,7 +2,15 @@
 
 > **Para los amantes de Pokémon, ¡una Poke ToDo list!**
 
+![ToDoMon App Screenshot](https://i.postimg.cc/ZnnyD7CC/Captura-de-pantalla-19-2-2026-20331.jpg)
+
 Una aplicación de tareas gamificada donde tus pendientes cobran vida. Cada tarea es un Pokémon que evoluciona a medida que avanzas, transformando tu productividad en una aventura clásica de Pokémon.
+
+> [!NOTE]
+> **Estado Actual**: La aplicación es totalmente funcional, aunque pueden existir algunos bugs visuales menores con ciertas cadenas de evolución o sprites que no afectan el funcionamiento principal. Estamos trabajando en pulir estos detalles.
+
+> [!TIP]
+> **Futuro del Proyecto**: Se planea una refactorización completa a **React** para mejorar la escalabilidad y el rendimiento en la próxima gran versión.
 
 ![Version](https://img.shields.io/badge/version-5.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
