@@ -11,26 +11,36 @@ Una aplicación de tareas gamificada donde tus pendientes cobran vida. Cada tare
 
 ## ⚡ Características Principales
 
-Esta no es una lista de tareas ordinaria. Aquí, completas misiones para entrañar a tu equipo:
+Esta no es una lista de tareas ordinaria. Aquí, completas misiones para **construir tu equipo Pokémon**:
+
+-   **Nuevo: Pokédex Dashboard**: 
+    -   Rastrea todos los Pokémon que has capturado completando tareas.
+    -   Visualiza tu colección con sprites, nombres y fechas de captura.
+    -   Filtra por estado: Capturado (Completado) o En Progreso.
+
+-   **Nuevo: Hábitat de Vida Artificial**:
+    -   Tus tareas activas viven en el pie de página como Pokémon reales.
+    -   **Comportamiento Autónomo**: Caminan, descansan y exploran el entorno de forma independiente.
+    -   **Profundidad Visual**: Sistema de capas que da sensación de espacio 3D.
+    -   **Ciclo Día/Noche**: El hábitat cambia con el modo oscuro, mostrando un cielo estrellado.
 
 -   **Evolución e Items**:
     -   Las tareas **Urgentes** e **Ideas** evolucionan como Pokémon reales al completar sus subtareas.
     -   Las tareas de **Algún Día** (Someday) se representan como objetos de aventura (Pokéballs, Piedras Evolutivas).
+
 -   **Sistema de Categorías Expandido**:
     -   🔥 **Urgente**: Pokémon de Fuego para máxima prioridad.
-    -   💼 **Trabajo (Gym)**: Retos de gimnasio y batalla.
+    -   💼 **Trabajo**: Retos de gimnasio y batalla.
     -   🏠 **Personal**: Pokémon amigables y compañeros.
     -   📚 **Aprendizaje**: Tipo Psíquico para el conocimiento.
     -   💡 **Ideas**: Creatividad y Legendarios (¡con probabilidad Shiny!).
     -   🌟 **Algún Día**: Items y objetos especiales.
+
 -   **Diseño Nostálgico**:
     -   Fuentes Pixel Art ('Press Start 2P') para la inmersión retro.
     -   Iconos de acción temáticos: **TM** para editar, **Repel** para borrar, **Rare Candy** para completar.
     -   Barras de progreso visuales y contadores integrados.
--   **Experiencia Inmersiva**:
-    -   Efectos de sonido originales (Gritos Pokémon, subir de nivel).
-    -   Modo Noche con cielo estrellado.
-    -   Efectos holográficos estilo TCG.
+    -   Efectos holográficos "Shiny" al completar tareas al 100%.
 
 ## 🚀 Cómo Empezar
 

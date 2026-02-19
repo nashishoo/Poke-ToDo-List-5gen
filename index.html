@@ -18,7 +18,7 @@
         rel="stylesheet">
 </head>
 
-<body>
+<body class="dark-mode">
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
@@ -28,9 +28,8 @@
                 <h1>ToDoMon List</h1>
             </div>
             <div class="header-right">
-                <button class="dark-mode-btn" id="darkModeBtn" title="Cambiar modo">
-                    <span class="dark-icon">🌙</span>
-                    <span class="light-icon">☀️</span>
+                <button class="settings-btn" id="settingsBtn" title="Configuración">
+                    ⚙️
                 </button>
                 <div class="trainer-level">
                     <span class="level-label">Nivel</span>
@@ -50,6 +49,28 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <span class="progress-text" id="progressText">0%</span>
+            </div>
+        </section>
+
+        <!-- Pokédex Dashboard -->
+        <section class="pokedex-dashboard collapsed" id="pokedexDashboard">
+            <div class="pokedex-header" onclick="togglePokedex()">
+                <div class="pokedex-title">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/177.png" 
+                         alt="Natu" class="pokedex-icon">
+                    <h2>POKÉDEX</h2>
+                    <span class="pokedex-count" id="pokedexCount">0</span>
+                </div>
+                <span class="pokedex-toggle">▼</span>
+            </div>
+            <div class="pokedex-content" id="pokedexContent">
+                <div class="pokedex-grid" id="pokedexGrid">
+                    <!-- Pokédex entries will be rendered here -->
+                </div>
+                <div class="pokedex-empty" id="pokedexEmpty">
+                    <p>¡Tu Pokédex está vacía!</p>
+                    <span>Completa tareas para registrar Pokémon</span>
+                </div>
             </div>
         </section>
 
@@ -186,9 +207,11 @@
             <h3 id="newTaskModalTitle">Nueva Tarea</h3>
             <input type="hidden" id="newTaskCategory" value="gym">
             <div class="input-group">
+                <label>Nombre de la Misión</label>
                 <input type="text" id="newTaskInput" placeholder="¿Qué misión tienes?" maxlength="100">
             </div>
             <div class="description-group">
+                <label>Descripción</label>
                 <textarea id="newTaskDescription" placeholder="Descripción (opcional)..." rows="2"></textarea>
             </div>
             <div class="subtasks-input-section">
@@ -218,8 +241,14 @@
     <div class="modal-overlay" id="editModal">
         <div class="modal-content">
             <h3>Editar Tarea</h3>
-            <input type="text" id="editTaskInput" placeholder="Nombre de la tarea">
-            <textarea id="editTaskDescription" placeholder="Descripción (opcional)" rows="3"></textarea>
+            <div class="input-group">
+                <label>Nombre de la Misión</label>
+                <input type="text" id="editTaskInput" placeholder="Nombre de la tarea">
+            </div>
+            <div class="description-group">
+                <label>Descripción</label>
+                <textarea id="editTaskDescription" placeholder="Descripción (opcional)" rows="3"></textarea>
+            </div>
             <div class="subtasks-input-section">
                 <label class="subtasks-label">Sub-tareas:</label>
                 <div class="subtask-chips" id="editTaskSubtaskChips">
@@ -233,6 +262,25 @@
             <div class="modal-actions">
                 <button class="cancel-btn" id="cancelEdit">Cancelar</button>
                 <button class="save-btn" id="saveEdit">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <h3>⚙️ Configuración</h3>
+            <div class="input-group">
+                <label>Nombre de la App</label>
+                <input type="text" id="settingsAppName" placeholder="ToDoMon" maxlength="30">
+            </div>
+            <div class="settings-info">
+                <p>🎮 El Pokémon del header cambia aleatoriamente en cada recarga.</p>
+                <p>💤 Cuando la app está dormida, muestra una Pokéball.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="closeSettings">Cerrar</button>
+                <button class="save-btn" id="saveSettings">Guardar</button>
             </div>
         </div>
     </div>

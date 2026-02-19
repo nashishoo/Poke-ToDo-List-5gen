@@ -609,6 +609,115 @@ const LEGENDARY_POKEMON = [
     [382, 383], [384, 385], [483, 484], [638, 639, 640], [716, 717], [806, 807], [905, 906]
 ];
 
+// Pool de Pokémon aleatorios para el header (Gen 1-5)
+const HEADER_POKEMON_POOL = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 25, 26, 39, 40, 52, 53, 54, 55,
+    58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
+    76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 88, 89, 90, 91, 92, 93, 94,
+    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+    111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125,
+    126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
+    141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+    156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+    171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185,
+    186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200,
+    201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215,
+    216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230,
+    231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245,
+    246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260,
+    261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
+    276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290,
+    291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305,
+    306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320,
+    321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335,
+    336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350,
+    351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365,
+    366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380,
+    381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395,
+    396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410,
+    411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425,
+    426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440,
+    441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455,
+    456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470,
+    471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485,
+    486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500,
+    501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515,
+    516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530,
+    531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545,
+    546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560,
+    561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575,
+    576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590,
+    591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605,
+    606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616
+];
+
+const APP_NAME_KEY = 'todopkmn_app_name';
+const HEADER_POKEMON_KEY = 'todopkmn_header_pokemon';
+const POKEBALL_SPRITE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
+
+// Función para obtener Pokémon aleatorio del header
+function getRandomHeaderPokemon() {
+    const randomIndex = Math.floor(Math.random() * HEADER_POKEMON_POOL.length);
+    return HEADER_POKEMON_POOL[randomIndex];
+}
+
+// Función para actualizar el Pokémon del header
+function updateHeaderPokemon() {
+    const headerPokemon = document.getElementById('headerPokemon');
+    if (!headerPokemon) return;
+    
+    // Si está durmiendo, mostrar Pokéball
+    if (isSleeping) {
+        headerPokemon.src = POKEBALL_SPRITE;
+        headerPokemon.alt = 'Pokéball';
+        return;
+    }
+    
+    // Obtener o generar nuevo Pokémon
+    let pokemonId = localStorage.getItem(HEADER_POKEMON_KEY);
+    
+    if (!pokemonId) {
+        pokemonId = getRandomHeaderPokemon();
+        localStorage.setItem(HEADER_POKEMON_KEY, pokemonId);
+    }
+    
+    headerPokemon.src = getPokemonSpriteUrl(pokemonId);
+    headerPokemon.alt = 'Pokemon #' + pokemonId;
+}
+
+// Settings functions
+function openSettingsModal() {
+    const appName = localStorage.getItem(APP_NAME_KEY) || 'ToDoMon';
+    document.getElementById('settingsAppName').value = appName;
+    document.getElementById('settingsModal').classList.add('visible');
+}
+
+function closeSettingsModal() {
+    document.getElementById('settingsModal').classList.remove('visible');
+}
+
+function saveSettings() {
+    const newName = document.getElementById('settingsAppName').value.trim();
+    if (newName) {
+        localStorage.setItem(APP_NAME_KEY, newName);
+        document.querySelector('h1').textContent = newName;
+    }
+    
+    // Generar nuevo Pokémon aleatorio para el header
+    const newPokemonId = getRandomHeaderPokemon();
+    localStorage.setItem(HEADER_POKEMON_KEY, newPokemonId);
+    updateHeaderPokemon();
+    
+    closeSettingsModal();
+}
+
+// Modificar wakeUp para actualizar el Pokémon del header
+const originalWakeUp = wakeUp;
+wakeUp = function() {
+    originalWakeUp();
+    updateHeaderPokemon();
+};
+
 function getEvolutionChain(category, subtaskCount) {
     const now = Date.now();
     let chain, isItem = false, isShiny = false, noEvolution = false;
@@ -784,6 +893,15 @@ let newTaskModalSubtasks = [];
 let collapsedCategories = JSON.parse(localStorage.getItem('todopkmn_collapsed') || '[]');
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Cargar nombre de la app guardado
+    const savedAppName = localStorage.getItem(APP_NAME_KEY);
+    if (savedAppName) {
+        document.querySelector('h1').textContent = savedAppName;
+    }
+    
+    // Actualizar Pokémon del header (mostrará Pokéball si está dormido)
+    updateHeaderPokemon();
+    
     loadData();
     setupEventListeners();
     try {
@@ -800,6 +918,10 @@ document.addEventListener('DOMContentLoaded', function () {
     AudioSystem.init();
     initDarkMode();
     initCollapsedCategories();
+
+    // Render Pokédex Dashboard
+    renderPokedex();
+    updatePokedexNames();
 
     // Render habitat inmediatamente (en modo sleep por defecto)
     renderPokemonHabitat();
@@ -864,8 +986,17 @@ function toggleDarkMode() {
 }
 
 function setupEventListeners() {
-    // Dark mode toggle
-    document.getElementById('darkModeBtn').addEventListener('click', toggleDarkMode);
+    // Settings button
+    document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+    
+    // Settings modal events
+    document.getElementById('closeSettings').addEventListener('click', closeSettingsModal);
+    document.getElementById('saveSettings').addEventListener('click', saveSettings);
+    document.getElementById('settingsModal').addEventListener('click', function (e) {
+        if (e.target === e.currentTarget) closeSettingsModal();
+    });
+    
+    // Dark mode always on - no toggle needed
 
     // Category buttons (for visual selection)
     document.querySelectorAll('.category-btn').forEach(function (btn) {
@@ -1047,6 +1178,7 @@ function toggleSubtask(category, taskId, subtaskId) {
     renderTasks(category);
     updateStats();
     renderPokemonHabitat();
+    renderPokedex();
 
     // Force wake up on interaction
     if (isSleeping) wakeUp();
@@ -1059,6 +1191,8 @@ function deleteTask(category, taskId) {
     updateStats();
     renderTasks(category);
     updateStats();
+    renderPokemonHabitat();
+    renderPokedex();
     AudioSystem.play('delete');
 
     // Force wake up on interaction
@@ -1177,13 +1311,14 @@ function saveEdit() {
         const oldSubtaskCount = tasks[editingTaskId.category][taskIndex].subtasks.length;
         tasks[editingTaskId.category][taskIndex].subtasks = [...editModalSubtasks];
 
-        // If subtask count changed, regenerate evolution data
+        // If subtask count changed, recalculate evolution stage but KEEP original Pokemon
         if (editModalSubtasks.length !== oldSubtaskCount) {
             const task = tasks[editingTaskId.category][taskIndex];
-            task.evolutionData = getEvolutionChain(editingTaskId.category, editModalSubtasks.length);
-
-            // Update current pokemon/item based on progress
+            
+            // Get current progress to recalculate evolution stage
             const completedCount = task.subtasks.filter(s => s.completed).length;
+            
+            // Recalculate the evolution stage based on progress, but keep the original chain
             const evolution = getEvolutionStage(task.evolutionData, completedCount, editModalSubtasks.length);
 
             if (task.evolutionData.isItem) {
@@ -1197,6 +1332,7 @@ function saveEdit() {
         renderTasks(editingTaskId.category);
         updateStats();
         renderPokemonHabitat();
+        renderPokedex();
     }
     closeEditModal();
 }
@@ -1633,6 +1769,7 @@ function saveNewTask() {
     renderTasks(category);
     updateStats();
     renderPokemonHabitat();
+    renderPokedex();
 
     AudioSystem.play('add');
     if (!evolutionData.isItem) AudioSystem.playPokemonCry(task.currentPokemonId);
@@ -2000,5 +2137,123 @@ function scrollToTask(category, taskId) {
             taskElement.style.boxShadow = '';
         }, 2000);
     }
+}
+
+// ========== POKÉDEX DASHBOARD ==========
+
+// Toggle Pokédex panel
+function togglePokedex() {
+    const dashboard = document.getElementById('pokedexDashboard');
+    dashboard.classList.toggle('collapsed');
+}
+
+// Render Pokédex entries
+function renderPokedex() {
+    const grid = document.getElementById('pokedexGrid');
+    const empty = document.getElementById('pokedexEmpty');
+    const countEl = document.getElementById('pokedexCount');
+    
+    if (!grid || !empty || !countEl) return;
+
+    // Collect all Pokémon from all tasks
+    const pokedexEntries = [];
+    
+    Object.keys(tasks).forEach(function (category) {
+        tasks[category].forEach(function (task) {
+            // Skip items - only show Pokémon
+            if (task.evolutionData && task.evolutionData.isItem) {
+                return;
+            }
+            
+            const pokemonId = task.currentPokemonId || 
+                (task.evolutionData && task.evolutionData.chain ? task.evolutionData.chain[0] : null);
+            
+            if (pokemonId) {
+                const isCompleted = task.completed || 
+                    (task.subtasks && task.subtasks.length > 0 && 
+                     task.subtasks.every(s => s.completed));
+                
+                pokedexEntries.push({
+                    id: task.id,
+                    category: category,
+                    pokemonId: pokemonId,
+                    pokemonName: task.pokemonName || 'Cargando...',
+                    isShiny: task.evolutionData ? task.evolutionData.isShiny : false,
+                    createdAt: task.createdAt,
+                    completed: isCompleted,
+                    taskTitle: task.title
+                });
+            }
+        });
+    });
+
+    // Update count
+    countEl.textContent = pokedexEntries.length;
+
+    // Show empty state if no entries
+    if (pokedexEntries.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+
+    empty.style.display = 'none';
+
+    // Sort: completed first, then by date
+    pokedexEntries.sort(function (a, b) {
+        if (a.completed !== b.completed) {
+            return a.completed ? -1 : 1;
+        }
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    // Render entries
+    grid.innerHTML = pokedexEntries.map(function (entry) {
+        const spriteUrl = entry.isShiny 
+            ? getShinySpriteUrl(entry.pokemonId) 
+            : getPokemonSpriteUrl(entry.pokemonId);
+        
+        const formattedDate = new Date(entry.createdAt).toLocaleDateString('es-CL');
+        
+        return '<div class="pokedex-entry ' + (entry.completed ? 'completed' : '') + '" ' +
+               'data-task-id="' + entry.id + '" ' +
+               'data-category="' + entry.category + '">' +
+            '<img src="' + spriteUrl + '" alt="#" class="pokedex-sprite">' +
+            '<div class="pokedex-info">' +
+                '<div class="pokedex-id">#' + String(entry.pokemonId).padStart(3, '0') + '</div>' +
+                '<div class="pokedex-name">' + 
+                    escapeHTML(entry.pokemonName) + 
+                    (entry.isShiny ? '<span class="pokedex-shiny">SHINY</span>' : '') +
+                '</div>' +
+                '<span class="pokedex-status ' + (entry.completed ? 'completed' : 'in-progress') + '">' +
+                    (entry.completed ? '✓ CAPTURADO' : '◐ EN PROGRESO') +
+                '</span>' +
+                '<div class="pokedex-date">📅 ' + formattedDate + '</div>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+
+    // Add click handlers to scroll to task
+    grid.querySelectorAll('.pokedex-entry').forEach(function (el) {
+        el.addEventListener('click', function () {
+            scrollToTask(el.dataset.category, el.dataset.taskId);
+        });
+    });
+}
+
+// Fetch and update Pokémon names for Pokédex
+function updatePokedexNames() {
+    Object.keys(tasks).forEach(function (category) {
+        tasks[category].forEach(function (task) {
+            if (!task.evolutionData || task.evolutionData.isItem) return;
+            
+            const pokemonId = task.currentPokemonId || 
+                (task.evolutionData.chain ? task.evolutionData.chain[0] : null);
+            
+            if (pokemonId && !task.pokemonName) {
+                fetchPokemonName(task.id, category, pokemonId);
+            }
+        });
+    });
 }
 

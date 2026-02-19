@@ -19,6 +19,8 @@ Use this checklist to ensure the **ToDoMon List App** is ready for production/Gi
 - [ ] Tasks can be added, edited, deleted
 - [ ] Subtasks update progress correctly
 - [ ] Evolution system works (50%, 100%)
+- [ ] **Pokédex Dashboard**: Tracks captured Pokémon correctly
+- [ ] **Habitat**: Pokémon appear and move in the footer
 - [ ] LocalStorage persists data after refresh
 - [ ] Mode toggle (Dark/Light) works
 
