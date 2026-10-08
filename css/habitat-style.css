@@ -1,268 +1,155 @@
 /* ========================================
-   HÁBITAT DEL FOOTER (v5.3)
-   Única fuente de estilos del hábitat: fondo día/noche, Pokémon y tooltip.
+   HÁBITAT (v6.0) - decorativo; los Pokémon de tus tareas pasean por la pradera.
    ======================================== */
+
+.habitat-wrap {
+    margin-top: 24px;
+}
 
 .pokemon-habitat {
     position: relative;
-    height: 350px;
+    height: 240px;
     width: 100%;
-    margin-top: 10px;
-    overflow: visible; /* los tooltips pueden sobresalir del hábitat */
-    z-index: 100;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-1);
 }
 
-/* ---------- Fondo: DÍA ---------- */
 .habitat-bg {
     position: absolute;
     inset: 0;
-    z-index: 0;
-    border-top: 4px solid #2E7D32;
-    background: linear-gradient(to bottom, #87CEEB 0%, #98D8C8 50%, #4CAF50 100%);
-    transition: background 0.8s ease;
+    background:
+        radial-gradient(120% 60% at 50% 115%, #3E9B47 0 55%, transparent 56%),
+        linear-gradient(to bottom, #8FD3F4 0%, #BDE8F5 55%, #6CC070 56%, #3E9B47 100%);
+    transition: background 0.6s ease;
 }
 
-.habitat-bg::before,
-.habitat-bg::after {
+.habitat-bg::before {
     content: '';
     position: absolute;
-    left: 0;
-    right: 0;
-    pointer-events: none;
+    inset: 0 0 45% 0;
     opacity: 0;
-    transition: opacity 0.8s ease;
-}
-
-/* ---------- Fondo: NOCHE (modo oscuro o app dormida) ---------- */
-body.dark-mode .habitat-bg,
-.pokemon-habitat.sleeping .habitat-bg {
-    background: linear-gradient(to bottom, #0a0a1a 0%, #0d1b2a 20%, #1b263b 50%, #2d3a4a 100%);
-    border-top-color: #1a1a2e;
-}
-
-/* Estrellas */
-.habitat-bg::before {
-    top: 0;
-    bottom: 0;
+    transition: opacity 0.6s ease;
     background-image:
-        radial-gradient(circle at 2% 5%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 5% 12%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 8% 8%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 11% 15%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 14% 3%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 17% 20%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 20% 10%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 23% 25%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 26% 5%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 29% 18%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 32% 12%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 35% 28%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 38% 8%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 41% 22%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 44% 15%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 47% 30%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 50% 10%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 53% 25%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 56% 5%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 59% 18%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 62% 12%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 65% 28%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 68% 8%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 71% 20%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 74% 15%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 77% 30%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 80% 10%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 83% 25%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 86% 5%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 89% 18%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 92% 12%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 95% 28%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 98% 8%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 4% 35%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 9% 40%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 15% 38%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 21% 42%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 27% 35%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 33% 40%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 39% 38%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 45% 42%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 51% 35%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 57% 40%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 63% 38%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 69% 42%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 75% 35%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 81% 40%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 87% 38%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 93% 42%, #fff 1px, transparent 1px),
-        radial-gradient(circle at 99% 35%, #fff 1px, transparent 1px);
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
+        radial-gradient(circle at 6% 20%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 18% 60%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 27% 15%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 39% 45%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 52% 10%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 63% 55%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 71% 25%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 84% 50%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 93% 18%, #fff 1px, transparent 1.5px),
+        radial-gradient(circle at 88% 22%, #FFF6C8 6px, transparent 7px);
 }
 
-/* Suelo oscurecido */
-.habitat-bg::after {
-    bottom: 0;
-    height: 25%;
-    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+body.dark-mode .habitat-bg {
+    background:
+        radial-gradient(120% 60% at 50% 115%, #1D3B2A 0 55%, transparent 56%),
+        linear-gradient(to bottom, #0A1020 0%, #16233B 55%, #23432F 56%, #1D3B2A 100%);
 }
 
-body.dark-mode .habitat-bg::before,
-body.dark-mode .habitat-bg::after,
-.pokemon-habitat.sleeping .habitat-bg::before,
-.pokemon-habitat.sleeping .habitat-bg::after {
+body.dark-mode .habitat-bg::before {
     opacity: 1;
 }
 
-/* ---------- Pokémon ---------- */
 .pokemon-team {
     position: relative;
     width: 100%;
     height: 100%;
-    z-index: 1;
 }
 
-/* El contenedor toma el tamaño de la imagen (sin ancho/alto fijos) */
 .habitat-pokemon {
     position: absolute;
-    bottom: 40px;
+    bottom: 20px;
     display: flex;
     align-items: flex-end;
     cursor: pointer;
-    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.3));
     transition: filter 0.3s, transform 0.3s;
-    will-change: left;
 }
 
 .habitat-sprite {
-    --sprite-box: 96;
+    --sprite-box: 80;
     display: block;
-    image-rendering: pixelated;
 }
 
-/* Sin escalado al pasar el mouse para no deformar los píxeles */
 .habitat-pokemon:hover {
-    filter: brightness(1.2) drop-shadow(0 8px 10px rgba(0, 0, 0, 0.4));
-    transform: translateY(-10px);
+    filter: brightness(1.15) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.35));
+    transform: translateY(-6px);
     z-index: 1001 !important; /* debe ganarle al z-index en línea calculado por profundidad */
 }
 
 .habitat-pokemon.shiny {
-    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.8));
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.9));
 }
 
-.habitat-pokemon.sleeping {
-    opacity: 0.85;
+.habitat-pokemon.done {
+    opacity: 0.8;
 }
 
-/* ---------- Tooltip estilo carta TCG ---------- */
 .pokemon-tooltip {
     position: absolute;
     bottom: 100%;
     left: 50%;
-    transform: translateX(-50%) translateY(-10px);
-    background: linear-gradient(180deg, #FFFFFF 0%, #F8F8F8 100%);
-    border: 3px solid #333333;
-    border-radius: 12px;
-    padding: 12px 16px;
-    width: 180px;
-    text-align: left;
+    transform: translateX(-50%) translateY(-6px);
+    background: var(--surface);
+    color: var(--text);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 8px 10px;
+    width: 170px;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.2s;
-    z-index: 10000;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    font-family: var(--font-ui);
-    font-size: 11px;
+    box-shadow: var(--shadow-2);
+    font-size: 12px;
 }
 
 .habitat-pokemon:hover .pokemon-tooltip {
     opacity: 1;
-    animation: tooltipSlideUp 0.2s ease-out;
-}
-
-.pokemon-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -8px;
-    border-width: 8px;
-    border-style: solid;
-    border-color: #333333 transparent transparent transparent;
 }
 
 .tooltip-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 2px solid #FF0000;
+    gap: 6px;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--danger);
 }
 
 .tooltip-name {
-    font-family: var(--font-pixel);
-    font-size: 9px;
-    color: #000000;
-    text-transform: uppercase;
-    font-weight: bold;
+    font-weight: 700;
 }
 
 .tooltip-id {
     font-family: var(--font-hud);
-    font-size: 12px;
-    color: #666666;
-    font-weight: bold;
+    color: var(--text-2);
 }
 
 .tooltip-task {
-    font-family: var(--font-ui);
-    font-size: 11px;
-    margin-bottom: 4px;
-    font-weight: bold;
-    color: #333333;
+    font-weight: 600;
     line-height: 1.3;
 }
 
-.tooltip-date {
-    font-size: 9px;
-    color: #888888;
-    margin-bottom: 4px;
-    font-family: var(--font-ui);
-}
-
 .tooltip-status {
-    font-family: var(--font-hud);
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--color-gym);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-top: 2px;
+    color: var(--text-2);
+    font-size: 11px;
 }
 
-.tooltip-status.completed {
-    color: var(--color-success);
-}
-
-@keyframes tooltipSlideUp {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(0);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(-10px);
-    }
-}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .pokemon-habitat {
-        height: 200px;
+        height: 190px;
     }
 
     .habitat-sprite {
         --sprite-box: 64;
+    }
+
+    .pokemon-tooltip {
+        display: none;
     }
 }

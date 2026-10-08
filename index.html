@@ -3,294 +3,251 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ToDoMon List: una lista de tareas gamificada donde cada tarea es un Pokémon que evoluciona.">
-    <title>ToDoMon List App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="ToDoMon: lista de tareas gamificada donde cada tarea es un Pokémon que evoluciona.">
+    <meta name="theme-color" content="#0E1116" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#1565C0" media="(prefers-color-scheme: light)">
+    <meta name="color-scheme" content="light dark">
+    <title>ToDoMon</title>
+    <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=5.3">
-    <link rel="stylesheet" href="css/habitat-style.css?v=5.3">
-    <script src="js/app.js?v=5.3" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Press+Start+2P&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=6.0">
+    <link rel="stylesheet" href="css/habitat-style.css?v=6.0">
+    <script src="js/data.js?v=6.0" defer></script>
+    <script src="js/store.js?v=6.0" defer></script>
+    <script src="js/sprites.js?v=6.0" defer></script>
+    <script src="js/habitat.js?v=6.0" defer></script>
+    <script src="js/app.js?v=6.0" defer></script>
 </head>
 
 <body>
     <script>
-        // Aplica el tema antes de pintar para evitar parpadeo (la lógica completa está en js/app.js)
+        // Tema antes de pintar (evita parpadeo). La lógica completa está en js/app.js
         (function () {
-            var mode = localStorage.getItem('todopkmn_theme') || 'auto';
+            var mode = 'auto';
+            try {
+                var s = JSON.parse(localStorage.getItem('todomon_v6') || 'null');
+                mode = (s && s.settings && s.settings.theme) || localStorage.getItem('todopkmn_theme') || 'auto';
+            } catch (e) { }
             var h = new Date().getHours();
             if (mode === 'dark' || (mode === 'auto' && (h >= 20 || h < 7))) document.body.classList.add('dark-mode');
         })();
     </script>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="logo-section">
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
-                    alt="Pokéball" class="pkmn-sprite header-pokemon" id="headerPokemon">
-                <h1>ToDoMon List</h1>
-            </div>
-            <div class="header-right">
-                <button class="settings-btn theme-btn" id="themeBtn" title="Tema: Automático (según la hora)" aria-label="Cambiar tema">🌗</button>
-                <button class="settings-btn" id="settingsBtn" title="Configuración" aria-label="Configuración">⚙️</button>
-                <div class="trainer-level">
-                    <span class="level-label">Nivel</span>
-                    <span class="level-number" id="trainerLevel">1</span>
-                </div>
-            </div>
-        </header>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
 
-        <!-- Stats Section -->
-        <section class="stats-section">
-            <div class="stat-box">
-                <span class="stat-label">Tareas</span>
-                <span class="stat-value"><span id="completedCount">0</span> / <span id="totalCount">0</span></span>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="#tareas">
+                <span class="brand-partner"><img id="brandPartner" class="pkmn-sprite brand-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt=""></span>
+                <span class="brand-text">
+                    <span class="brand-title" id="appTitle">ToDoMon</span>
+                    <span class="brand-sub">Tareas · Pokémon · Teselia</span>
+                </span>
+            </a>
+            <button class="trainer-chip" id="trainerChip" type="button" title="Tarjeta de entrenador">
+                <span class="sr-only">Entrenador:</span>
+                <span class="chip-level">Nv <b id="chipLevel">1</b></span>
+                <span class="chip-xp" aria-hidden="true"><span id="chipXpFill"></span></span>
+                <span class="sr-only" id="chipXpText"></span>
+                <span class="chip-streak"><span aria-hidden="true">🔥</span><span class="sr-only">racha</span> <b id="chipStreak">0</b><span class="sr-only"> días</span></span>
+            </button>
+            <div class="topbar-actions">
+                <button class="icon-btn" id="soundBtn" type="button" aria-pressed="true" aria-label="Sonido activado">🔊</button>
+                <button class="icon-btn" id="themeBtn" type="button" aria-label="Tema automático">🌗</button>
+                <button class="icon-btn" id="helpBtn" type="button" aria-label="Atajos de teclado">⌨️</button>
+                <button class="icon-btn" id="settingsBtn" type="button" aria-label="Ajustes">⚙️</button>
             </div>
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </header>
+
+    <nav class="tabbar" aria-label="Secciones">
+        <a class="tab" href="#tareas" data-view="tasks"><span class="tab-ico" aria-hidden="true">📋</span><span class="tab-label">Tareas</span></a>
+        <a class="tab" href="#pokedex" data-view="pokedex"><span class="tab-ico" aria-hidden="true">📕</span><span class="tab-label">Pokédex</span></a>
+        <a class="tab" href="#entrenador" data-view="trainer"><span class="tab-ico" aria-hidden="true">🪪</span><span class="tab-label">Entrenador</span></a>
+        <a class="tab" href="#estadisticas" data-view="stats"><span class="tab-ico" aria-hidden="true">📊</span><span class="tab-label">Estadísticas</span></a>
+    </nav>
+
+    <main id="main" tabindex="-1">
+        <!-- ===================== TAREAS ===================== -->
+        <section class="view" id="view-tasks" data-view="tasks" aria-labelledby="tasksHeading">
+            <h1 class="view-title" id="tasksHeading">Tus misiones</h1>
+
+            <div class="summary" id="summary" aria-label="Resumen"></div>
+
+            <form class="quick-add panel" id="quickAdd" autocomplete="off">
+                <div class="qa-row">
+                    <label class="sr-only" for="qaTitle">Nueva tarea</label>
+                    <input id="qaTitle" class="input qa-title" type="text" maxlength="100" placeholder="Nueva misión…  ej: Pagar luz #urgente !alta @mañana" aria-describedby="qaHint">
+                    <label class="sr-only" for="qaCategory">Categoría</label>
+                    <select id="qaCategory" class="input qa-category"></select>
+                    <button class="btn btn-ghost" type="button" id="qaMore" aria-expanded="false" aria-controls="qaExtra">Más</button>
+                    <button class="btn btn-primary" type="submit">Agregar</button>
                 </div>
-                <span class="progress-text" id="progressText">0%</span>
+                <p class="qa-hint" id="qaHint">Atajos: <code>#categoría</code> <code>!alta</code>/<code>!baja</code> <code>@hoy</code>/<code>@mañana</code>/<code>@2026-12-24</code> <code>*diaria</code>/<code>*semanal</code> · Tecla <kbd>N</kbd> para escribir</p>
+                <div class="qa-extra" id="qaExtra" hidden>
+                    <label class="field"><span>Fecha límite</span><input id="qaDue" class="input" type="date"></label>
+                    <label class="field"><span>Prioridad</span><select id="qaPriority" class="input"></select></label>
+                    <label class="field"><span>Repetir</span><select id="qaRecurrence" class="input"></select></label>
+                    <label class="field field-wide"><span>Subtareas (una por línea)</span><textarea id="qaSubtasks" class="input" rows="3" placeholder="Paso 1&#10;Paso 2"></textarea></label>
+                </div>
+            </form>
+
+            <div class="toolbar panel" role="search">
+                <label class="sr-only" for="searchInput">Buscar tareas</label>
+                <input id="searchInput" class="input search" type="search" placeholder="Buscar…  (tecla /)">
+                <div class="chips" id="statusFilters" role="group" aria-label="Filtrar por estado"></div>
+                <div class="chips chips-scroll" id="categoryFilters" role="group" aria-label="Filtrar por categoría"></div>
+                <label class="sort"><span class="sort-label">Orden</span>
+                    <select id="sortSelect" class="input">
+                        <option value="manual">Manual (arrastrar)</option>
+                        <option value="due">Fecha límite</option>
+                        <option value="priority">Prioridad</option>
+                    </select>
+                </label>
             </div>
+
+            <div id="categoryList" class="category-list"></div>
+            <div class="empty-state" id="emptyState" hidden>
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/178.png" alt="" width="120" height="120">
+                <p id="emptyText">¡Tu equipo está vacío!</p>
+            </div>
+
+            <section class="habitat-wrap" aria-label="Hábitat: los Pokémon de tus tareas">
+                <div class="pokemon-habitat" id="pokemonHabitat" aria-hidden="true">
+                    <div class="habitat-bg"></div>
+                    <div class="pokemon-team" id="pokemonTeam"></div>
+                </div>
+            </section>
         </section>
 
-        <!-- Pokédex Dashboard -->
-        <section class="pokedex-dashboard collapsed" id="pokedexDashboard">
-            <div class="pokedex-header" id="pokedexHeader">
-                <div class="pokedex-title">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/177.png" 
-                         alt="Natu" class="pkmn-sprite pokedex-icon" data-pokemon="177">
-                    <h2>POKÉDEX</h2>
-                    <span class="pokedex-count" id="pokedexCount">0</span>
-                </div>
-                <span class="pokedex-toggle">▼</span>
+        <!-- ===================== POKÉDEX ===================== -->
+        <section class="view" id="view-pokedex" data-view="pokedex" aria-labelledby="dexHeading" hidden>
+            <h1 class="view-title" id="dexHeading">Pokédex</h1>
+            <div class="panel dex-progress" id="dexProgress"></div>
+            <div class="toolbar panel">
+                <label class="sr-only" for="dexSearch">Buscar en la Pokédex</label>
+                <input id="dexSearch" class="input search" type="search" placeholder="Buscar por nombre o número">
+                <div class="chips" id="dexFilters" role="group" aria-label="Filtrar Pokédex"></div>
             </div>
-            <div class="pokedex-content" id="pokedexContent">
-                <div class="pokedex-grid" id="pokedexGrid">
-                    <!-- Pokédex entries will be rendered here -->
-                </div>
-                <div class="pokedex-empty" id="pokedexEmpty">
-                    <p>¡Tu Pokédex está vacía!</p>
-                    <span>Completa tareas para registrar Pokémon</span>
-                </div>
-            </div>
+            <ul class="dex-grid" id="dexGrid"></ul>
+            <p class="empty-state" id="dexEmpty" hidden>Completa tareas para registrar Pokémon.</p>
         </section>
 
-
-        <!-- Task Lists -->
-        <section class="tasks-section">
-            <!-- 🔥 Urgente -->
-            <div class="task-category collapsible" id="urgentTasks">
-                <div class="category-header" data-category="urgent">
-                    <span class="collapse-icon">▼</span>
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/257.png"
-                        alt="Blaziken" class="pkmn-sprite category-pokemon" data-pokemon="257">
-                    <div class="category-info">
-                        <h2>🔥 Urgente</h2>
-                        <span class="category-subtitle">Prioridad máxima</span>
-                    </div>
-                    <button class="pokeball-btn add-task-btn" data-category="urgent" title="Agregar tarea">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png"
-                            alt="Master Ball" class="pokeball-img">
-                    </button>
-                    <span class="task-count" data-category="urgent">0</span>
-                </div>
-                <ul class="task-list" id="urgentList"></ul>
-            </div>
-
-            <!-- 💼 Trabajo -->
-            <div class="task-category collapsible" id="workTasks">
-                <div class="category-header" data-category="work">
-                    <span class="collapse-icon">▼</span>
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/248.png"
-                        alt="Tyranitar" class="pkmn-sprite category-pokemon" data-pokemon="248">
-                    <div class="category-info">
-                        <h2>💼 Trabajo</h2>
-                        <span class="category-subtitle">Tareas profesionales</span>
-                    </div>
-                    <button class="pokeball-btn add-task-btn" data-category="work" title="Agregar tarea">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png"
-                            alt="Ultra Ball" class="pokeball-img">
-                    </button>
-                    <span class="task-count" data-category="work">0</span>
-                </div>
-                <ul class="task-list" id="workList"></ul>
-            </div>
-
-            <!-- 🏠 Personal -->
-            <div class="task-category collapsible" id="personalTasks">
-                <div class="category-header" data-category="personal">
-                    <span class="collapse-icon">▼</span>
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
-                        alt="Pikachu" class="pkmn-sprite category-pokemon" data-pokemon="25">
-                    <div class="category-info">
-                        <h2>🏠 Personal</h2>
-                        <span class="category-subtitle">Hogar y familia</span>
-                    </div>
-                    <button class="pokeball-btn add-task-btn" data-category="personal" title="Agregar tarea">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png"
-                            alt="Great Ball" class="pokeball-img">
-                    </button>
-                    <span class="task-count" data-category="personal">0</span>
-                </div>
-                <ul class="task-list" id="personalList"></ul>
-            </div>
-
-            <!-- 📚 Aprendizaje -->
-            <div class="task-category collapsible" id="learningTasks">
-                <div class="category-header" data-category="learning">
-                    <span class="collapse-icon">▼</span>
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/196.png"
-                        alt="Espeon" class="pkmn-sprite category-pokemon" data-pokemon="196">
-                    <div class="category-info">
-                        <h2>📚 Aprendizaje</h2>
-                        <span class="category-subtitle">Cursos y skills</span>
-                    </div>
-                    <button class="pokeball-btn add-task-btn" data-category="learning" title="Agregar tarea">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
-                            alt="Poké Ball" class="pokeball-img">
-                    </button>
-                    <span class="task-count" data-category="learning">0</span>
-                </div>
-                <ul class="task-list" id="learningList"></ul>
-            </div>
-
-            <!-- 💡 Ideas -->
-            <div class="task-category collapsible" id="ideasTasks">
-                <div class="category-header" data-category="ideas">
-                    <span class="collapse-icon">▼</span>
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png"
-                        alt="Mew" class="pkmn-sprite category-pokemon" data-pokemon="151">
-                    <div class="category-info">
-                        <h2>💡 Ideas</h2>
-                        <span class="category-subtitle">Brainstorm y futuro</span>
-                    </div>
-                    <button class="pokeball-btn add-task-btn" data-category="ideas" title="Agregar tarea">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png"
-                            alt="Ultra Ball" class="pokeball-img">
-                    </button>
-                    <span class="task-count" data-category="ideas">0</span>
-                </div>
-                <ul class="task-list" id="ideasList"></ul>
-            </div>
-
-            <!-- 🌟 Algún Día -->
-            <div class="task-category collapsible" id="somedayTasks">
-                <div class="category-header" data-category="someday">
-                    <span class="collapse-icon">▼</span>
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png"
-                        alt="Snorlax" class="pkmn-sprite category-pokemon" data-pokemon="143">
-                    <div class="category-info">
-                        <h2>🌟 Algún Día</h2>
-                        <span class="category-subtitle">Sin prisa</span>
-                    </div>
-                    <button class="pokeball-btn add-task-btn" data-category="someday" title="Agregar tarea">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
-                            alt="Poké Ball" class="pokeball-img">
-                    </button>
-                    <span class="task-count" data-category="someday">0</span>
-                </div>
-                <ul class="task-list" id="somedayList"></ul>
-            </div>
+        <!-- ===================== ENTRENADOR ===================== -->
+        <section class="view" id="view-trainer" data-view="trainer" aria-labelledby="trainerHeading" hidden>
+            <h1 class="view-title" id="trainerHeading">Tarjeta de entrenador</h1>
+            <div id="trainerCard"></div>
+            <h2 class="section-title">Estuche de medallas</h2>
+            <ul class="badge-case" id="badgeCase"></ul>
         </section>
 
-        <!-- Empty State -->
-        <div class="empty-state" id="emptyState">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/178.png"
-                alt="Xatu" class="empty-pokemon">
-            <p>¡Tu equipo está vacío!</p>
-            <span>Agrega tu primera tarea para comenzar tu aventura</span>
-        </div>
-    </div>
+        <!-- ===================== ESTADÍSTICAS ===================== -->
+        <section class="view" id="view-stats" data-view="stats" aria-labelledby="statsHeading" hidden>
+            <h1 class="view-title" id="statsHeading">Estadísticas</h1>
+            <div id="statsContent"></div>
+        </section>
+    </main>
 
-    <!-- New Task Modal -->
-    <div class="modal-overlay" id="newTaskModal">
-        <div class="modal-content new-task-modal">
-            <h3 id="newTaskModalTitle">Nueva Tarea</h3>
-            <input type="hidden" id="newTaskCategory" value="urgent">
-            <div class="input-group">
-                <label>Nombre de la Misión</label>
-                <input type="text" id="newTaskInput" placeholder="¿Qué misión tienes?" maxlength="100">
+    <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+    <div class="sr-only" id="srAnnounce" aria-live="polite"></div>
+
+    <!-- ===================== DIÁLOGO: DETALLES DE TAREA ===================== -->
+    <dialog class="dialog" id="taskDialog" aria-labelledby="taskDialogTitle">
+        <form method="dialog" id="taskForm" class="dialog-body" autocomplete="off">
+            <header class="dialog-head">
+                <h2 id="taskDialogTitle">Detalles de la misión</h2>
+                <button class="icon-btn" value="cancel" formnovalidate aria-label="Cerrar">✕</button>
+            </header>
+            <div class="evo-line" id="evoLine" aria-label="Línea evolutiva"></div>
+            <label class="field"><span>Nombre de la misión</span><input id="tdTitle" class="input" type="text" maxlength="100" required></label>
+            <label class="field"><span>Descripción</span><textarea id="tdDescription" class="input" rows="2" placeholder="Opcional"></textarea></label>
+            <div class="field-grid">
+                <label class="field"><span>Categoría</span><select id="tdCategory" class="input"></select></label>
+                <label class="field"><span>Prioridad</span><select id="tdPriority" class="input"></select></label>
+                <label class="field"><span>Fecha límite</span><input id="tdDue" class="input" type="date"></label>
+                <label class="field"><span>Repetir</span><select id="tdRecurrence" class="input"></select></label>
             </div>
-            <div class="description-group">
-                <label>Descripción</label>
-                <textarea id="newTaskDescription" placeholder="Descripción (opcional)..." rows="2"></textarea>
-            </div>
-            <div class="subtasks-input-section">
-                <label class="subtasks-label">Sub-tareas:</label>
-                <div class="subtask-chips" id="newTaskSubtaskChips">
-                    <span class="no-subtasks">Sin sub-tareas aún</span>
+            <label class="check-row" id="tdCompletedRow"><input type="checkbox" id="tdCompleted"> <span>Completada</span></label>
+            <fieldset class="subtask-editor">
+                <legend>Subtareas</legend>
+                <ul id="tdSubtasks" class="subtask-edit-list"></ul>
+                <div class="add-row">
+                    <label class="sr-only" for="tdNewSubtask">Nueva subtarea</label>
+                    <input id="tdNewSubtask" class="input" type="text" maxlength="80" placeholder="Nueva subtarea… (Enter)">
+                    <button class="btn btn-ghost" type="button" id="tdAddSubtask">Añadir</button>
                 </div>
-                <div class="add-subtask-row">
-                    <input type="text" id="newTaskSubtaskInput" placeholder="Nueva sub-tarea..." maxlength="50">
-                    <button id="newTaskAddSubtaskBtn" class="add-subtask-btn">+</button>
+            </fieldset>
+            <footer class="dialog-foot">
+                <button class="btn btn-danger" type="button" id="tdDelete">Eliminar</button>
+                <span class="spacer"></span>
+                <button class="btn btn-ghost" value="cancel" formnovalidate>Cancelar</button>
+                <button class="btn btn-primary" type="submit" value="save" id="tdSave">Guardar</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <!-- ===================== DIÁLOGO: AJUSTES ===================== -->
+    <dialog class="dialog" id="settingsDialog" aria-labelledby="settingsTitle">
+        <form method="dialog" class="dialog-body">
+            <header class="dialog-head">
+                <h2 id="settingsTitle">Ajustes</h2>
+                <button class="icon-btn" value="close" aria-label="Cerrar">✕</button>
+            </header>
+            <label class="field"><span>Nombre de la app</span><input id="setAppName" class="input" type="text" maxlength="30"></label>
+            <fieldset class="field">
+                <legend>Tema</legend>
+                <div class="radio-row" id="setTheme">
+                    <label><input type="radio" name="theme" value="auto"> Automático (noche 20:00–07:00)</label>
+                    <label><input type="radio" name="theme" value="light"> Día</label>
+                    <label><input type="radio" name="theme" value="dark"> Noche</label>
                 </div>
-            </div>
-            <div class="modal-actions">
-                <button class="cancel-btn" id="cancelNewTask">Cancelar</button>
-                <button class="save-btn" id="saveNewTask">Crear Tarea</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer Pokemon Habitat -->
-    <footer class="pokemon-habitat" id="pokemonHabitat">
-        <div class="habitat-bg"></div>
-        <div class="pokemon-team" id="pokemonTeam"></div>
-    </footer>
-
-    <!-- Edit Modal -->
-    <div class="modal-overlay" id="editModal">
-        <div class="modal-content">
-            <h3>Editar Tarea</h3>
-            <div class="input-group">
-                <label>Nombre de la Misión</label>
-                <input type="text" id="editTaskInput" placeholder="Nombre de la tarea">
-            </div>
-            <div class="description-group">
-                <label>Descripción</label>
-                <textarea id="editTaskDescription" placeholder="Descripción (opcional)" rows="3"></textarea>
-            </div>
-            <div class="subtasks-input-section">
-                <label class="subtasks-label">Sub-tareas:</label>
-                <div class="subtask-chips" id="editTaskSubtaskChips">
-                    <span class="no-subtasks">Sin sub-tareas aún</span>
+            </fieldset>
+            <label class="check-row"><input type="checkbox" id="setSound"> <span>Sonidos (gritos de Pokémon)</span></label>
+            <label class="check-row"><input type="checkbox" id="setNotify"> <span>Avisarme de tareas para hoy o vencidas (mientras la app esté abierta)</span></label>
+            <p class="hint" id="notifyStatus"></p>
+            <fieldset class="field">
+                <legend>Respaldo</legend>
+                <div class="btn-row">
+                    <button class="btn btn-ghost" type="button" id="exportBtn">Exportar JSON</button>
+                    <label class="btn btn-ghost file-btn">Importar JSON<input type="file" id="importInput" accept="application/json,.json" class="sr-only"></label>
+                    <button class="btn btn-primary" type="button" id="installBtn" hidden>📲 Instalar app</button>
                 </div>
-                <div class="add-subtask-row">
-                    <input type="text" id="editTaskSubtaskInput" placeholder="Nueva sub-tarea..." maxlength="50">
-                    <button id="editTaskAddSubtaskBtn" class="add-subtask-btn">+</button>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="cancel-btn" id="cancelEdit">Cancelar</button>
-                <button class="save-btn" id="saveEdit">Guardar</button>
-            </div>
-        </div>
-    </div>
+                <p class="hint">Antes de importar se guarda una copia de tus datos actuales en este navegador.</p>
+            </fieldset>
+            <button class="btn btn-ghost" type="button" id="openHelpFromSettings">⌨️ Atajos y sintaxis del agregado rápido</button>
+            <p class="hint version">ToDoMon v<span id="appVersion"></span> · Sprites y datos de <a href="https://pokeapi.co" target="_blank" rel="noopener">PokeAPI</a></p>
+        </form>
+    </dialog>
 
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal-content">
-            <h3>⚙️ Configuración</h3>
-            <div class="input-group">
-                <label>Nombre de la App</label>
-                <input type="text" id="settingsAppName" placeholder="ToDoMon" maxlength="30">
-            </div>
-            <div class="settings-info">
-                <p>🎮 Al guardar, el Pokémon del header cambia por uno aleatorio.</p>
-                <p>💤 Cuando la app está dormida, muestra una Pokéball.</p>
-                <p>🌗 El botón de tema alterna entre automático (noche de 20:00 a 07:00), día y noche.</p>
-                <p class="app-version">ToDoMon v5.3</p>
-            </div>
-            <div class="modal-actions">
-                <button class="cancel-btn" id="closeSettings">Cerrar</button>
-                <button class="save-btn" id="saveSettings">Guardar</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- ===================== DIÁLOGO: ATAJOS ===================== -->
+    <dialog class="dialog" id="helpDialog" aria-labelledby="helpTitle">
+        <form method="dialog" class="dialog-body">
+            <header class="dialog-head">
+                <h2 id="helpTitle">Atajos de teclado</h2>
+                <button class="icon-btn" value="close" aria-label="Cerrar">✕</button>
+            </header>
+            <dl class="shortcuts">
+                <dt><kbd>N</kbd></dt><dd>Nueva tarea (agregado rápido)</dd>
+                <dt><kbd>/</kbd></dt><dd>Buscar</dd>
+                <dt><kbd>1</kbd>–<kbd>4</kbd></dt><dd>Tareas · Pokédex · Entrenador · Estadísticas</dd>
+                <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd></dt><dd>Deshacer la última eliminación</dd>
+                <dt><kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd></dt><dd>Mover la tarea enfocada (o flechas sobre el asa ⋮⋮)</dd>
+                <dt><kbd>Esc</kbd></dt><dd>Cerrar diálogos</dd>
+                <dt><kbd>?</kbd></dt><dd>Mostrar esta ayuda</dd>
+            </dl>
+            <h3>Agregado rápido</h3>
+            <ul class="hint-list">
+                <li><code>#trabajo</code>, <code>#ideas</code>, <code>#algundia</code>… elige la categoría</li>
+                <li><code>!alta</code> / <code>!baja</code> fija la prioridad</li>
+                <li><code>@hoy</code>, <code>@mañana</code>, <code>@lunes</code> o <code>@2026-12-24</code> fija la fecha</li>
+                <li><code>*diaria</code> / <code>*semanal</code> la hace recurrente</li>
+            </ul>
+        </form>
+    </dialog>
 </body>
 
 </html>
