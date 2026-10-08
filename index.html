@@ -4,33 +4,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ToDoMon List: una lista de tareas gamificada donde cada tarea es un Pokémon que evoluciona.">
     <title>ToDoMon List App</title>
-    <title>ToDoMon List App</title>
-    <!-- Cache buster added for style.css - FORCE RELOAD -->
-    <script>document.write('<link rel="stylesheet" href="css/style.css?nocache=' + new Date().getTime() + '">');</script>
-    <script>document.write('<link rel="stylesheet" href="css/habitat-style.css?nocache=' + new Date().getTime() + '">');</script>
-    <noscript>
-        <link rel="stylesheet" href="css/style.css">
-        <link rel="stylesheet" href="css/habitat-style.css">
-    </noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap"
-        rel="stylesheet">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=5.3">
+    <link rel="stylesheet" href="css/habitat-style.css?v=5.3">
+    <script src="js/app.js?v=5.3" defer></script>
 </head>
 
-<body class="dark-mode">
+<body>
+    <script>
+        // Aplica el tema antes de pintar para evitar parpadeo (la lógica completa está en js/app.js)
+        (function () {
+            var mode = localStorage.getItem('todopkmn_theme') || 'auto';
+            var h = new Date().getHours();
+            if (mode === 'dark' || (mode === 'auto' && (h >= 20 || h < 7))) document.body.classList.add('dark-mode');
+        })();
+    </script>
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
             <div class="logo-section">
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/472.png"
-                    alt="Gliscor" class="header-pokemon" id="headerPokemon">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+                    alt="Pokéball" class="pkmn-sprite header-pokemon" id="headerPokemon">
                 <h1>ToDoMon List</h1>
             </div>
             <div class="header-right">
-                <button class="settings-btn" id="settingsBtn" title="Configuración">
-                    ⚙️
-                </button>
+                <button class="settings-btn theme-btn" id="themeBtn" title="Tema: Automático (según la hora)" aria-label="Cambiar tema">🌗</button>
+                <button class="settings-btn" id="settingsBtn" title="Configuración" aria-label="Configuración">⚙️</button>
                 <div class="trainer-level">
                     <span class="level-label">Nivel</span>
                     <span class="level-number" id="trainerLevel">1</span>
@@ -54,10 +58,10 @@
 
         <!-- Pokédex Dashboard -->
         <section class="pokedex-dashboard collapsed" id="pokedexDashboard">
-            <div class="pokedex-header" onclick="togglePokedex()">
+            <div class="pokedex-header" id="pokedexHeader">
                 <div class="pokedex-title">
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/177.png" 
-                         alt="Natu" class="pokedex-icon">
+                         alt="Natu" class="pkmn-sprite pokedex-icon" data-pokemon="177">
                     <h2>POKÉDEX</h2>
                     <span class="pokedex-count" id="pokedexCount">0</span>
                 </div>
@@ -82,7 +86,7 @@
                 <div class="category-header" data-category="urgent">
                     <span class="collapse-icon">▼</span>
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/257.png"
-                        alt="Blaziken" class="category-pokemon">
+                        alt="Blaziken" class="pkmn-sprite category-pokemon" data-pokemon="257">
                     <div class="category-info">
                         <h2>🔥 Urgente</h2>
                         <span class="category-subtitle">Prioridad máxima</span>
@@ -101,7 +105,7 @@
                 <div class="category-header" data-category="work">
                     <span class="collapse-icon">▼</span>
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/248.png"
-                        alt="Tyranitar" class="category-pokemon">
+                        alt="Tyranitar" class="pkmn-sprite category-pokemon" data-pokemon="248">
                     <div class="category-info">
                         <h2>💼 Trabajo</h2>
                         <span class="category-subtitle">Tareas profesionales</span>
@@ -120,7 +124,7 @@
                 <div class="category-header" data-category="personal">
                     <span class="collapse-icon">▼</span>
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
-                        alt="Pikachu" class="category-pokemon">
+                        alt="Pikachu" class="pkmn-sprite category-pokemon" data-pokemon="25">
                     <div class="category-info">
                         <h2>🏠 Personal</h2>
                         <span class="category-subtitle">Hogar y familia</span>
@@ -139,7 +143,7 @@
                 <div class="category-header" data-category="learning">
                     <span class="collapse-icon">▼</span>
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/196.png"
-                        alt="Espeon" class="category-pokemon">
+                        alt="Espeon" class="pkmn-sprite category-pokemon" data-pokemon="196">
                     <div class="category-info">
                         <h2>📚 Aprendizaje</h2>
                         <span class="category-subtitle">Cursos y skills</span>
@@ -158,7 +162,7 @@
                 <div class="category-header" data-category="ideas">
                     <span class="collapse-icon">▼</span>
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png"
-                        alt="Mew" class="category-pokemon">
+                        alt="Mew" class="pkmn-sprite category-pokemon" data-pokemon="151">
                     <div class="category-info">
                         <h2>💡 Ideas</h2>
                         <span class="category-subtitle">Brainstorm y futuro</span>
@@ -177,7 +181,7 @@
                 <div class="category-header" data-category="someday">
                     <span class="collapse-icon">▼</span>
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png"
-                        alt="Snorlax" class="category-pokemon">
+                        alt="Snorlax" class="pkmn-sprite category-pokemon" data-pokemon="143">
                     <div class="category-info">
                         <h2>🌟 Algún Día</h2>
                         <span class="category-subtitle">Sin prisa</span>
@@ -205,7 +209,7 @@
     <div class="modal-overlay" id="newTaskModal">
         <div class="modal-content new-task-modal">
             <h3 id="newTaskModalTitle">Nueva Tarea</h3>
-            <input type="hidden" id="newTaskCategory" value="gym">
+            <input type="hidden" id="newTaskCategory" value="urgent">
             <div class="input-group">
                 <label>Nombre de la Misión</label>
                 <input type="text" id="newTaskInput" placeholder="¿Qué misión tienes?" maxlength="100">
@@ -275,8 +279,10 @@
                 <input type="text" id="settingsAppName" placeholder="ToDoMon" maxlength="30">
             </div>
             <div class="settings-info">
-                <p>🎮 El Pokémon del header cambia aleatoriamente en cada recarga.</p>
+                <p>🎮 Al guardar, el Pokémon del header cambia por uno aleatorio.</p>
                 <p>💤 Cuando la app está dormida, muestra una Pokéball.</p>
+                <p>🌗 El botón de tema alterna entre automático (noche de 20:00 a 07:00), día y noche.</p>
+                <p class="app-version">ToDoMon v5.3</p>
             </div>
             <div class="modal-actions">
                 <button class="cancel-btn" id="closeSettings">Cerrar</button>
@@ -285,11 +291,6 @@
         </div>
     </div>
 
-    <!-- Cache Buster for app.js -->
-    <script>document.write('<script src="js/app.js?v=' + new Date().getTime() + '"><\/script>');</script>
-    <noscript>
-        <script src="js/app.js"></script>
-    </noscript>
 </body>
 
 </html>
