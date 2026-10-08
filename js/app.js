@@ -1,2259 +1,1184 @@
 /**
- * ToDoMon List App
+ * ToDoMon v6.0 - Interfaz (vistas, diálogos, atajos, PWA).
+ * Depende de: data.js, store.js, sprites.js, habitat.js (scripts clásicos, en ese orden).
  */
+'use strict';
 
-const STORAGE_KEY = 'todopkmn_tasks';
-const TRAINER_KEY = 'todopkmn_trainer_level';
-const DARK_MODE_KEY = 'todopkmn_dark_mode';
+const STATUS_FILTERS = [
+    { id: 'all', label: 'Todas' },
+    { id: 'pending', label: 'Pendientes' },
+    { id: 'today', label: 'Hoy' },
+    { id: 'overdue', label: 'Vencidas' },
+    { id: 'done', label: 'Completadas' }
+];
+const DEX_FILTERS = [
+    { id: 'all', label: 'Todos' },
+    { id: 'caught', label: 'Capturados' },
+    { id: 'progress', label: 'En progreso' },
+    { id: 'shiny', label: 'Variocolor ✨' }
+];
+const VIEWS = { tasks: 'tareas', pokedex: 'pokedex', trainer: 'entrenador', stats: 'estadisticas' };
+const VIEW_ORDER = ['tasks', 'pokedex', 'trainer', 'stats'];
+const GENERATIONS = [
+    { name: 'Kanto', from: 1, to: 151 }, { name: 'Johto', from: 152, to: 251 }, { name: 'Hoenn', from: 252, to: 386 },
+    { name: 'Sinnoh', from: 387, to: 493 }, { name: 'Teselia', from: 494, to: 649 }
+];
+const THEME_LABELS = { auto: 'automático', light: 'día', dark: 'noche' };
+const THEME_ICONS = { auto: '🌗', light: '☀️', dark: '🌙' };
+const WEEKDAYS = { domingo: 0, lunes: 1, martes: 2, miercoles: 3, jueves: 4, viernes: 5, sabado: 6 };
+const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
-const CATEGORIES = {
-    urgent: {
-        id: 'urgent',
-        name: 'Urgente',
-        emoji: '🔥',
-        subtitle: 'Prioridad máxima',
-        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/257.png',
-        listId: 'urgentList',
-        color: '#E74C3C',
-        ball: 'master-ball'
-    },
-    work: {
-        id: 'work',
-        name: 'Trabajo',
-        emoji: '💼',
-        subtitle: 'Tareas profesionales',
-        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/248.png',
-        listId: 'workList',
-        color: '#3498DB',
-        ball: 'ultra-ball'
-    },
-    personal: {
-        id: 'personal',
-        name: 'Personal',
-        emoji: '🏠',
-        subtitle: 'Hogar y familia',
-        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png',
-        listId: 'personalList',
-        color: '#2ECC71',
-        ball: 'great-ball'
-    },
-    learning: {
-        id: 'learning',
-        name: 'Aprendizaje',
-        emoji: '📚',
-        subtitle: 'Cursos y skills',
-        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/196.png',
-        listId: 'learningList',
-        color: '#9B59B6',
-        ball: 'poke-ball'
-    },
-    ideas: {
-        id: 'ideas',
-        name: 'Ideas',
-        emoji: '💡',
-        subtitle: 'Brainstorm y futuro',
-        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png',
-        listId: 'ideasList',
-        color: '#F39C12',
-        ball: 'ultra-ball'
-    },
-    someday: {
-        id: 'someday',
-        name: 'Algún Día',
-        emoji: '🌟',
-        subtitle: 'Sin prisa',
-        sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png',
-        listId: 'somedayList',
-        color: '#95A5A6',
-        ball: 'poke-ball'
-    }
+const ui = {
+    view: 'tasks',
+    search: '',
+    status: 'all',
+    category: 'all',
+    dexFilter: 'all',
+    dexSearch: '',
+    editingId: null,
+    editSubs: [],
+    undo: null,
+    celebrate: null,
+    today: null,
+    installPrompt: null,
+    returnFocus: null
 };
 
-const GYM_EVOLUTIONS = {
-    // Gen 1 - Kanto
-    1: [1, 2, 3],      // Bulbasaur → Ivysaur → Venusaur
-    2: [4, 5, 6],      // Charmander → Charmeleon → Charizard
-    3: [7, 8, 9],      // Squirtle → Wartortle → Blastoise
-    4: [43, 44, 45],   // Oddish → Gloom → Vileplume
-    5: [60, 61, 62],   // Poliwag → Poliwhirl → Poliwrath
-    6: [74, 75, 76],   // Geodude → Graveler → Golem
-    7: [92, 93, 94],   // Gastly → Haunter → Gengar
-    8: [109, 110],     // Koffing → Weezing
-    9: [133, 470],     // Eevee → Leafeon (Glaceon en agua)
-    // Gen 2 - Johto
-    10: [152, 153, 154], // Chikorita → Bayleef → Meganium
-    11: [155, 156, 157], // Cyndaquil → Quilava → Typhlosion
-    12: [158, 159, 160], // Totodile → Croconaw → Feraligatr
-    13: [161, 162],     // Sentret → Furret
-    14: [165, 166],     // Ledyba → Ledian
-    15: [167, 168],     // Spinarak → Ariados
-    16: [170, 171],     // Chinchou → Lanturn
-    17: [173, 174],     // Cleffa → Clefairy → (no Jiggly en gym)
-    18: [187, 188, 189], // Hoppip → Skiploom → Jumpluff
-    19: [191, 192],     // Sunkern → Sunflora
-    20: [194, 195],     // Wooper → Quagsire
-    // Gen 3 - Hoenn
-    21: [258, 259, 260], // Mudkip → Marshtomp → Swampert
-    22: [261, 262],     // Poochyena → Mightyena
-    23: [271, 272],     // Lotad → Lombre
-    24: [273, 274],     // Seedot → Nuzleaf
-    25: [276, 277],     // Taillow → Swellow
-    26: [278, 279],     // Wingull → Pelipper
-    27: [280, 281, 282], // Ralts → Kirlia → Gardevoir
-    28: [283, 284],     // Surskit → Masquerain
-    29: [300, 301],     // Mawile
-    // Gen 4 - Sinnoh
-    31: [387, 388, 389], // Turtwig → Grotle → Torterra
-    32: [390, 391, 392], // Chimchar → Monferno → Infernape
-    33: [393, 394, 395], // Piplup → Prinplup → Empoleon
-    34: [408, 409, 410], // Cranidos → Rampardos (Shieldon → Bastiodon)
-    35: [415, 416],     // Burmy → Wormadam
-    36: [420, 421],     // Cherubi → Cherrim
-    37: [433, 434],     // Stunky → Skuntank
-    // Gen 5 - Unova
-    38: [495, 496, 497], // Snivy → Servine → Serperior
-    39: [498, 499, 500], // Tepig → Pignite → Emboar
-    40: [501, 502, 503], // Oshawott → Dewott → Samurott
-    41: [519, 520, 521], // Patrat → Watchog (Purrloin → Liepard)
-    42: [522, 523],     // Blitzle → Zebstrika
-    43: [532, 533, 534], // Timburr → Gurdurr → Conkeldurr
-    44: [540, 541, 542], // Sewaddle → Swadloon → Leavanny
-    45: [543, 544, 545], // Venipede → Whirlipede → Scolipede
-    46: [546, 547, 548], // Cottonee → Whimsicott (Petilil → Lilligant)
-    47: [550, 551, 552], // Basculin → (Red-Striped) → Braviary
-    48: [554, 555],     // Darumaka → Darmanitan
-    49: [556, 557],     // Maractus → (no evolution)
-    50: [559, 560],     // Scraggy → Scrafty
-    51: [561, 562],     // Sigilyph → (no evolution)
-    52: [570, 571],     // Zorua → Zoruark
-    53: [572, 573],     // Minccino → Cinccino
-    54: [574, 575, 576], // Gothita → Gothorita → Gothitelle
-    55: [577, 578, 579], // Solosis → Duosion → Reuniclus
-    56: [588, 589],     // Karrablast → Escavalier
-    57: [590, 591],     // Foongus → Amoonguss
-    58: [592, 593],     // Frillish → Jellicent
-    59: [597, 598],     // Ferroseed → Ferrothorn
-    60: [600, 601],     // Klink → Klang
-    61: [602, 603],     // Tynamo → Eelektrik
-    62: [604, 605, 606], // Elgyem → Beheeyem (Litwick → Lampent → Chandelure)
-    63: [608, 609],     // Lampent → Chandelure
-    64: [610, 611, 612], // Axew → Fraxure → Haxorus
-    65: [613, 614],     // Cubchoo → Beartic
-    66: [615, 616],     // Cryogonal → (no evolution)
-    67: [618, 619],     // Stunfisk → (no evolution)
-    68: [622, 623, 624], // Golett → Golurk → (no 3rd)
-    69: [625, 626],     // Braviary → (no evolution, pero Hydreigon tiene 3)
-    70: [633, 634, 635], // Deino → Zweigous → Hydreigon
-    71: [636, 637, 638], // Larvesta → Volcarona → (no)
-};
+const $ = function (id) { return document.getElementById(id); };
 
-// Pokémon que Ash ha tenido en el anime (Gen 1-5)
-const ASH_POKEMON = [
-    // Pikachu (su compañero principal)
-    25, // Pikachu
-    // Gen 1
-    1, 2, 3,    // Bulbasaur, Ivysaur, Venusaur
-    4, 5, 6,    // Charmander, Charmeleon, Charizard
-    7, 8, 9,    // Squirtle, Wartortle, Blastoise
-    10,         // Caterpie
-    11, 12,     // Metapod, Butterfree
-    13, 14, 15, // Weedle, Kakuna, Beedrill
-    16, 17, 18, // Pidgey, Pidgeotto, Pidgeot
-    19, 20,     // Rattata, Raticate
-    21,         // Spearow
-    22,         // Fearow
-    23, 24,     // Ekans, Arbok
-    26,         // Raichu
-    27, 28,     // Sandshrew, Sandslash
-    29, 30, 31, // Nidoran♀, Nidorina, Nidoqueen
-    32, 33, 34, // Nidoran♂, Nidorino, Nidoking
-    35, 36,     // Clefairy, Clefable
-    37, 38,     // Vulpix, Ninetales
-    39, 40,     // Jigglypuff, Wigglytuff
-    41, 42,     // Zubat, Golbat
-    43, 44, 45, // Oddish, Gloom, Vileplume
-    46, 47,     // Paras, Parasect
-    48, 49,     // Venonat, Venomoth
-    50, 51,     // Diglett, Dugtrio
-    52, 53,     // Meowth, Persian
-    54, 55,     // Psyduck, Golduck
-    56, 57,     // Mankey, Primeape
-    58, 59,     // Growlithe, Arcanine
-    60, 61, 62, // Poliwag, Poliwhirl, Poliwrath
-    63, 64, 65, // Abra, Kadabra, Alakazam
-    66, 67, 68, // Machop, Machoke, Machamp
-    69, 70, 71, // Bellsprout, Weepinbell, Victreebel
-    72, 73,     // Tentacool, Tentacruel
-    74, 75, 76, // Geodude, Graveler, Golem
-    77, 78,     // Ponyta, Rapidash
-    79, 80,     // Slowpoke, Slowbro
-    81, 82,     // Magnemite, Magneton
-    83, 84, 85, // Farfetch'd, Doduo, Dodrio
-    86, 87, 88, // Seel, Dewgong, Grimer
-    89, 90, 91, // Muk, Shellder, Cloyster
-    92, 93, 94, // Gastly, Haunter, Gengar
-    95, 96,     // Onix, Drowzee
-    97, 98, 99, // Krabby, Kingler, Voltorb
-    100, 101,   // Electrode, Exeggcute
-    102, 103,   // Exeggutor, Cubone
-    104, 105,   // Marowak, Hitmonlee
-    106, 107,   // Hitmonchan, Lickitung
-    108, 109, 110, // Koffing, Weezing, Rhyhorn
-    111, 112,   // Rhyodon, Chansey
-    113, 114,   // Tangela, Kangaskhan
-    115,         // Mr. Mime
-    116, 117,   // Scyther, Jynx
-    118, 119,   // Poliwag evolution (Staryu, Starmie en otra)
-    120, 121,   // Staryu, Starmie
-    122,         // Mr. Mime (duplicate)
-    123, 124,   // Scyther (duplicate), Jynx (duplicate)
-    125, 126,   // Electabuzz, Magmar
-    127, 128,   // Pinsir, Tauros
-    129, 130,   // Magikarp, Gyarados
-    131, 132,   // Lapras, Ditto
-    133, 134,   // Eevee, Vaporeon
-    135, 136,   // Jolteon, Flareon
-    137, 138,   // Porygon, Omanyte
-    139, 140,   // Omastar, Kabuto
-    141, 142,   // Kabutops, Aerodactyl
-    143, 144,   // Snorlax, Articuno
-    145, 146,   // Zapdos, Moltres
-    147, 148, 149, // Dratini, Dragonair, Dragonite
-    150, 151,   // Mewtwo, Mew
-    // Gen 2
-    152, 153, 154, // Chikorita, Bayleef, Meganium
-    155, 156, 157, // Cyndaquil, Quilava, Typhlosion
-    158, 159, 160, // Totodile, Croconaw, Feraligatr
-    161, 162,     // Sentret, Furret
-    163, 164,     // Hoothoot, Noctowl
-    165, 166,     // Ledyba, Ledian
-    167, 168,     // Spinarak, Ariados
-    169, 170, 171, // Crobat, Chinchou, Lanturn
-    172, 173, 174, // Pichu, Cleffa, Igglybuff
-    175, 176,     // Togepi, Togetic
-    177, 178,     // Natu, Xatu
-    179, 180,     // Mareep, Flaaffy
-    181, 182,     // Ampharos, Bellossom
-    183, 184,     // Marill, Azumarill
-    185, 186,     // Sudowoodo, Politoed
-    187, 188, 189, // Hoppip, Skiploom, Jumpluff
-    190, 191, 192, // Aipom, Sunkern, Sunflora
-    193, 194, 195, // Yanma, Wooper, Quagsire
-    196, 197,     // Espeon, Umbreon
-    198, 199,     // Murkrow, Slowking
-    200, 201,     // Misdreavus, Unown
-    202, 203,     // Wobbuffet, Girafarig
-    204, 205,     // Pineco, Forretress
-    206, 207,     // Dunsparce, Gligar
-    208, 209,     // Steelix, Snubbull
-    210, 211,     // Granbull, Qwilfish
-    212, 213,     // Scizor, Shuckle
-    214, 215,     // Heracross, Sneasel
-    216, 217,     // Teddiursa, Ursaring
-    218, 219,     // Slugma, Magcargo
-    220, 221,     // Swinub, Piloswine
-    222, 223,     // Corsola, Remoraid
-    224, 225,     // Octillery, Delibird
-    226, 227,     // Mantine, Skarmory
-    228, 229,     // Houndour, Houndoom
-    230, 231,     // Kingdra, Phanpy
-    232, 233,     // Donphan, Porygon2
-    234, 235,     // Stantler, Smeargle
-    236, 237,     // Tyrogue, Hitmontop
-    238, 239,     // Smoochum, Elekid
-    240, 241,     // Magby, Miltank
-    242, 243, 244, // Blissey, Raikou, Entei
-    245, 246,     // Suicune, Larvitar
-    247, 248,     // Pupitar, Tyranitar
-    249, 250,     // Lugia, Ho-Oh
-    251,         // Celebi
-    // Gen 3
-    252, 253, 254, // Treecko, Grovyle, Sceptile
-    255, 256, 257, // Torchic, Combusken, Blaziken
-    258, 259, 260, // Mudkip, Marshtomp, Swampert
-    261, 262,     // Poochyena, Mightyena
-    263, 264,     // Zigzagoon, Linoone
-    265, 266,     // Wurmple, Silcoon
-    267, 268,     // Beautifly, Cascoon
-    269, 270, 271, // Dustox, Lotad, Lombre
-    272, 273, 274, // Seedot, Nuzleaf, Shiftry
-    275, 276,     // Taillow, Swellow
-    277, 278,     // Wingull, Pelipper
-    279, 280, 281, // Ralts, Kirlia, Gardevoir
-    282, 283,     // Surskit, Masquerain
-    284, 285,     // Shroomish, Breloom
-    286, 287,     // Slakoth, Vigoroth
-    288, 289,     // Slaking, Nincada
-    290, 291,     // Ninjask, Shedinja
-    292, 293,     // Whismur, Loudred
-    294, 295,     // Exploud, Makuhita
-    296, 297,     // Hariyama, Azurill
-    298, 299,     // Nosepass, Skitty
-    300, 301,     // Mawile, Delcatty
-    302, 303,     // Sableye, Mawile (dup)
-    304, 305,     // Aron, Lairon
-    306, 307,     // Aggron, Meditite
-    308, 309,     // Medicham, Plusle
-    310, 311,     // Minun, Volbeat
-    312, 313,     // Illumise, Volbeat (dup)
-    314, 315,     // Roselia, Gulpin
-    316, 317,     // Swalot, Carvanha
-    318, 319,     // Sharpedo, Wailmer
-    320, 321,     // Wailord, Numel
-    322, 323,     // Camerupt, Torkoal
-    324, 325,     // Spoink, Grumpig
-    326, 327,     // Spinda, Trapinch
-    328, 329,     // Vibrava, Flygon
-    330, 331,     // Cacnea, Cacturne
-    332, 333,     // Swablu, Altaria
-    334, 335,     // Zangoose, Seviper
-    336, 337,     // Lunatone, Solrock
-    338, 339,     // Barboach, Whiscash
-    340, 341,     // Corphish, Crawdaunt
-    342, 343,     // Baltoy, Claydol
-    344, 345,     // Lileep, Cradily
-    346, 347,     // Anorith, Armaldo
-    348, 349,     // Feebas, Milotic
-    350, 351,     // Castform, Kecleon
-    352, 353,     // Shuppet, Banette
-    354, 355,     // Duskull, Dusclops
-    356, 357,     // Tropius, Chimecho
-    358, 359,     // Absol, Wynaut
-    360, 361,     // Snorunt, Glalie
-    362, 363,     // Spheal, Sealeo
-    364, 365,     // Walrein, Clamperl
-    366, 367,     // Huntail, Gorebyss
-    368, 369,     // Relicanth, Luvdisc
-    370, 371,     // Bagon, Shelgon
-    372, 373,     // Salamence, Beldum
-    374, 375, 376, // Metang, Metagross, Regirock
-    377, 378,     // Regice, Registeel
-    379, 380,     // Latias, Latios
-    381, 382,     // Kyogre, Groudon
-    383, 384,     // Rayquaza, Jirachi
-    385, 386,     // Deoxys, Jirachi (dup)
-    // Gen 4
-    387, 388, 389, // Turtwig, Grotle, Torterra
-    390, 391, 392, // Chimchar, Monferno, Infernape
-    393, 394, 395, // Piplup, Prinplup, Empoleon
-    396, 397,     // Starly, Staravia
-    398, 399,     // Staraptor, Bidoof
-    400, 401,     // Bibarel, Kricketot
-    402, 403,     // Kricketune, Shinx
-    404, 405,     // Luxio, Luxray
-    406, 407,     // Budew, Roserade
-    408, 409, 410, // Cranidos, Rampardos, Shieldon
-    411, 412,     // Bastiodon, Burmy
-    413, 414,     // Wormadam, Mothim
-    415, 416,     // Combee, Vespiquen
-    417, 418,     // Pachirisu, Buizel
-    419, 420,     // Floatzel, Cherubi
-    421, 422,     // Cherrim, Shellos
-    423, 424,     // Gastrodon, Ambipom
-    425, 426,     // Drifloon, Drifblim
-    427, 428,     // Buneary, Lopunny
-    429, 430,     // Mismagius, Honchkrow
-    431, 432,     // Glameow, Purugly
-    433, 434,     // Chingling, Stunky
-    435, 436,     // Skuntank, Bronzor
-    437, 438,     // Bronzong, Bonsly
-    439, 440,     // Mime Jr., Happiny
-    441, 442,     // Chatot, Spiritomb
-    443, 444,     // Gible, Gabite
-    445, 446,     // Garchomp, Lucario
-    447, 448,     // Riolu, Hippopotas
-    449, 450,     // Hippowdon, Skorupi
-    451, 452,     // Drapion, Croagunk
-    453, 454,     // Toxicroak, Carnivine
-    454, 455,     // Carnivine (dup), Finneon
-    456, 457,     // Lumineon, Snover
-    458, 459,     // Abomasnow, Weavile
-    460, 461,     // Lickilicky, Rhyperior
-    462, 463,     // Tangrowth, Electivire
-    463, 464,     // Magmortar, Togekiss
-    465, 466,     // Yanmega, Leafeon
-    467, 468,     // Glaceon, Glalie
-    469, 470,     // Froslass, Mamoswine
-    471, 472,     // Porygon-Z, Gallade
-    473, 474,     // Probopass, Dusknoir
-    475, 476,     // Froslass (dup), Rotom
-    477, 478,     // Uxie, Mesprit
-    479, 480,     // Azelf, Heatran
-    481, 482,     // Regigigas, Giratina
-    483, 484,     // Cresselia, Phione
-    485, 486,     // Manaphy, Darkrai
-    487, 488,     // Shaymin, Arceus
-    // Gen 5
-    494, 495, 496, // Victini, Snivy, Servine
-    497, 498, 499, // Serperior, Tepig, Pignite
-    500, 501, 502, // Emboar, Oshawott, Dewott
-    503, 504, 505, // Samurott, Patrat, Watchog
-    506, 507, 508, // Lillipup, Herdier, Stoutland
-    509, 510,     // Purrloin, Liepard
-    511, 512,     // Pansage, Simisage
-    513, 514,     // Pansear, Simisear
-    514, 515,     // Simisear (dup), Panpour
-    516, 517,     // Simipour, Munna
-    518, 519,     // Musharna, Pidove
-    520, 521,     // Tranquill, Unfezant
-    522, 523,     // Blitzle, Zebstrika
-    524, 525,     // Roggenrola, Boldore
-    526, 527,     // Gigalith, Woobat
-    528, 529,     // Swoobat, Drilbur
-    530, 531,     // Excadrill, Audino
-    532, 533, 534, // Timburr, Gurdurr, Conkeldurr
-    535, 536,     // Tympole, Palpitoad
-    537, 538,     // Seismitoad, Throh
-    539, 540,     // Sawk, Sewaddle
-    541, 542,     // Swadloon, Venipede
-    543, 544,     // Whirlipede, Scolipede
-    545, 546,     // Cottonee, Whimsicott
-    547, 548,     // Petilil, Lilligant
-    549, 550,     // Basculin, Sandile
-    551, 552,     // Krokorok, Karrablast
-    553, 554,     // Escavalier, Foongus
-    555, 556,     // Amoonguss, Frillish
-    557, 558,     // Jellicent, Alomomola
-    559, 560,     // Tynamo, Eelektrik
-    561, 562,     // Eelektross, Elgyem
-    563, 564,     // Beheeyem, Lampent
-    565, 566,     // Chandelure, Axew
-    567, 568,     // Fraxure, Cubchoo
-    569, 570,     // Beartic, Cryogonal
-    571, 572,     // Stunfisk, Mienfoo
-    573, 574,     // Mienshao, Druddigon
-    575, 576,     // Golett, Golurk
-    577, 578,     // Pawniard, Bisharp
-    579, 580,     // Bouffalant, Rufflet
-    581, 582,     // Braviary, Vullaby
-    583, 584,     // Heatmor, Durant
-    585, 586,     // Deino, Zweigous
-    587, 588,     // Hydreigon, Larvesta
-    589, 590,     // Volcarona, Cobalion
-    591, 592,     // Terrakion, Virizion
-    593, 594,     // Tornadus, Thundurus
-    595, 596,     // Reshiram, Zekrom
-    597, 598,     // Kyurem, Keldeo
-    599, 600,     // Meloetta, Genesect
-];
+// ========== UTILIDADES ==========
+function normalizeText(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
 
-// Fire-type Pokémon (Urgente category)
-const FIRE_TYPES = [
-    // Gen 1
-    4, 5, 6,        // Charmander → Charmeleon → Charizard
-    37, 38,         // Vulpix → Ninetales
-    58, 59,         // Growlithe → Arcanine
-    77, 78,         // Ponyta → Rapidash
-    126,            // Magmar
-    136,            // Flareon
-    146,            // Moltres (Legendary)
-    // Gen 2
-    155, 156, 157,  // Cyndaquil → Quilava → Typhlosion
-    218, 219,       // Slugma → Magcargo
-    228, 229,       // Houndour → Houndoom
-    240,            // Magby
-    244,            // Entei (Legendary)
-    250,            // Ho-Oh (Legendary)
-    // Gen 3
-    255, 256, 257,  // Torchic → Combusken → Blaziken
-    322, 323,       // Numel → Camerupt
-    324,            // Torkoal
-    // Gen 4
-    390, 391, 392,  // Chimchar → Monferno → Infernape
-    467,            // Magmortar
-    485,            // Heatran (Legendary)
-    // Gen 5
-    494,            // Victini (Legendary)
-    498, 499, 500,  // Tepig → Pignite → Emboar
-    513, 514,       // Pansear → Simisear
-    554, 555,       // Darumaka → Darmanitan
-    607, 608, 609,  // Litwick → Lampent → Chandelure
-    631,            // Heatmor
-    636, 637,       // Larvesta → Volcarona
-    643             // Reshiram (Legendary)
-];
-
-// Friendly/Cute Pokémon (Personal category)
-const FRIENDLY_TYPES = [
-    // Gen 1
-    25, 26,         // Pikachu → Raichu
-    35, 36,         // Clefairy → Clefable
-    39, 40,         // Jigglypuff → Wigglytuff
-    113,            // Chansey
-    133, 134, 135, 136, // Eevee → Vaporeon, Jolteon, Flareon
-    // Gen 2
-    172, 173, 174,  // Pichu, Cleffa, Igglybuff
-    175, 176,       // Togepi → Togetic
-    183, 184,       // Marill → Azumarill
-    196, 197,       // Espeon, Umbreon
-    216, 217,       // Teddiursa → Ursaring
-    231,            // Phanpy
-    242,            // Blissey
-    // Gen 3
-    298,            // Azurill
-    300, 301,       // Skitty → Delcatty
-    311, 312,       // Plusle, Minun
-    363, 364, 365,  // Spheal → Sealeo → Walrein
-    // Gen 4
-    403, 404, 405,  // Shinx → Luxio → Luxray
-    417,            // Pachirisu
-    427, 428,       // Buneary → Lopunny
-    438,            // Bonsly
-    439,            // Mime Jr.
-    440,            // Happiny
-    468,            // Togekiss
-    470, 471,       // Leafeon, Glaceon
-    // Gen 5
-    506, 507, 508,  // Lillipup → Herdier → Stoutland
-    531,            // Audino
-    546, 547,       // Cottonee → Whimsicott
-    548, 549,       // Petilil → Lilligant
-    572, 573        // Minccino → Cinccino
-];
-
-// Psychic-type Pokémon (Aprendizaje category)
-const PSYCHIC_TYPES = [
-    // Gen 1
-    63, 64, 65,     // Abra → Kadabra → Alakazam
-    79, 80,         // Slowpoke → Slowbro
-    96, 97,         // Drowzee → Hypno
-    102, 103,       // Exeggcute → Exeggutor
-    121,            // Starmie
-    122,            // Mr. Mime
-    124,            // Jynx
-    150, 151,       // Mewtwo, Mew
-    // Gen 2
-    177, 178,       // Natu → Xatu
-    196,            // Espeon
-    199,            // Slowking
-    201,            // Unown
-    202,            // Wobbuffet
-    203,            // Girafarig
-    238,            // Smoochum
-    251,            // Celebi
-    // Gen 3
-    280, 281, 282,  // Ralts → Kirlia → Gardevoir
-    307, 308,       // Meditite → Medicham
-    325, 326,       // Spoink → Grumpig
-    337, 338,       // Lunatone, Solrock
-    343, 344,       // Baltoy → Claydol
-    358,            // Chimecho
-    360,            // Wynaut
-    374, 375, 376,  // Beldum → Metang → Metagross
-    380, 381,       // Latias, Latios
-    385, 386,       // Jirachi, Deoxys
-    // Gen 4
-    433,            // Chingling
-    436, 437,       // Bronzor → Bronzong
-    439,            // Mime Jr.
-    475,            // Gallade
-    480, 481, 482,  // Uxie, Mesprit, Azelf
-    488,            // Cresselia
-    // Gen 5
-    494,            // Victini
-    517, 518,       // Munna → Musharna
-    527, 528,       // Woobat → Swoobat
-    561,            // Sigilyph
-    574, 575, 576,  // Gothita → Gothorita → Gothitelle
-    577, 578, 579,  // Solosis → Duosion → Reuniclus
-    605, 606,       // Elgyem → Beheeyem
-    648             // Meloetta
-];
-
-// Extended Legendary Pokémon (5+ subtasks)
-const LEGENDARY_POKEMON_EXTENDED = [
-    // Gen 1
-    144, 145, 146,  // Articuno, Zapdos, Moltres
-    150, 151,       // Mewtwo, Mew
-    // Gen 2
-    243, 244, 245,  // Raikou, Entei, Suicune
-    249, 250,       // Lugia, Ho-Oh
-    251,            // Celebi
-    // Gen 3
-    377, 378, 379,  // Regirock, Regice, Registeel
-    380, 381,       // Latias, Latios
-    382, 383, 384,  // Kyogre, Groudon, Rayquaza
-    385, 386,       // Jirachi, Deoxys
-    // Gen 4
-    480, 481, 482,  // Uxie, Mesprit, Azelf
-    483, 484,       // Dialga, Palkia
-    485,            // Heatran
-    486,            // Regigigas
-    487,            // Giratina
-    488,            // Cresselia
-    489, 490,       // Phione, Manaphy
-    491,            // Darkrai
-    492,            // Shaymin
-    493,            // Arceus
-    // Gen 5
-    494,            // Victini
-    638, 639, 640,  // Cobalion, Terrakion, Virizion
-    641, 642, 645,  // Tornadus, Thundurus, Landorus
-    643, 644, 646,  // Reshiram, Zekrom, Kyurem
-    647,            // Keldeo
-    648,            // Meloetta
-    649             // Genesect
-];
-
-const ADVENTURE_ITEMS = [
-    { id: 'masterball', name: 'Master Ball', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png' },
-    { id: 'ultraball', name: 'Ultra Ball', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png' },
-    { id: 'greatball', name: 'Great Ball', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png' },
-    { id: 'pokeball', name: 'Poke Ball', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png' },
-    { id: 'moonstone', name: 'Moon Stone', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/moon-stone.png' },
-    { id: 'sunstone', name: 'Sun Stone', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/sun-stone.png' },
-];
-
-const LEGENDARY_POKEMON = [
-    [144, 145, 146], [150, 151], [243, 244, 245], [249, 250], [377, 378], [380, 381],
-    [382, 383], [384, 385], [483, 484], [638, 639, 640], [716, 717], [806, 807], [905, 906]
-];
-
-// Pool de Pokémon aleatorios para el header (Gen 1-5)
-const HEADER_POKEMON_POOL = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 25, 26, 39, 40, 52, 53, 54, 55,
-    58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
-    76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 88, 89, 90, 91, 92, 93, 94,
-    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
-    111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125,
-    126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
-    141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
-    156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
-    171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185,
-    186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200,
-    201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215,
-    216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230,
-    231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245,
-    246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260,
-    261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
-    276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290,
-    291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305,
-    306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320,
-    321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335,
-    336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350,
-    351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365,
-    366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380,
-    381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395,
-    396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410,
-    411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425,
-    426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440,
-    441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455,
-    456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470,
-    471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485,
-    486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500,
-    501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515,
-    516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530,
-    531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545,
-    546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560,
-    561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575,
-    576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590,
-    591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605,
-    606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616
-];
-
-const APP_NAME_KEY = 'todopkmn_app_name';
-const HEADER_POKEMON_KEY = 'todopkmn_header_pokemon';
-const POKEBALL_SPRITE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
-
-// Función para obtener Pokémon aleatorio del header
-function getRandomHeaderPokemon() {
-    const randomIndex = Math.floor(Math.random() * HEADER_POKEMON_POOL.length);
-    return HEADER_POKEMON_POOL[randomIndex];
+function formatDate(dateStr) {
+    const d = parseDateStr(dateStr);
+    if (!d) return '';
+    return d.getDate() + ' ' + MONTHS[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
 }
 
-// Función para actualizar el Pokémon del header
-function updateHeaderPokemon() {
-    const headerPokemon = document.getElementById('headerPokemon');
-    if (!headerPokemon) return;
-    
-    // Si está durmiendo, mostrar Pokéball
-    if (isSleeping) {
-        headerPokemon.src = POKEBALL_SPRITE;
-        headerPokemon.alt = 'Pokéball';
-        return;
+function dueLabel(task) {
+    const st = dueStatus(task);
+    if (!st) return '';
+    const diff = daysBetween(todayStr(), task.due);
+    switch (st) {
+        case 'overdue': return diff === -1 ? 'Venció ayer' : 'Venció hace ' + (-diff) + ' días';
+        case 'today': return 'Vence hoy';
+        case 'tomorrow': return 'Mañana';
+        case 'soon': return 'En ' + diff + ' días';
+        default: return formatDate(task.due);
     }
-    
-    // Obtener o generar nuevo Pokémon
-    let pokemonId = localStorage.getItem(HEADER_POKEMON_KEY);
-    
-    if (!pokemonId) {
-        pokemonId = getRandomHeaderPokemon();
-        localStorage.setItem(HEADER_POKEMON_KEY, pokemonId);
+}
+
+function focusByKey(key) {
+    if (!key) return false;
+    const el = document.querySelector('[data-focus="' + CSS.escape(key) + '"]');
+    if (el && !el.disabled) { el.focus({ preventScroll: true }); return true; }
+    return false;
+}
+
+// Re-renderiza conservando el foco (los elementos interactivos llevan data-focus)
+function withFocus(fn) {
+    const active = document.activeElement;
+    const key = active && active.dataset ? active.dataset.focus : null;
+    fn();
+    if (key && document.activeElement !== active) focusByKey(key);
+}
+
+function nameSpan(id) {
+    return '<span data-name-id="' + id + '">' + escapeHTML(pokemonLabel(id)) + '</span>';
+}
+
+// Anuncio solo para lectores de pantalla (el cambio ya es visible en la interfaz)
+function announce(msg) {
+    const live = $('srAnnounce');
+    live.textContent = '';
+    setTimeout(function () { live.textContent = msg; }, 50);
+}
+
+// ========== TOASTS ==========
+function showToast(message, opts) {
+    opts = opts || {};
+    const box = $('toasts');
+    const el = document.createElement('div');
+    el.className = 'toast' + (opts.kind ? ' toast-' + opts.kind : '') + (opts.quiet ? ' toast-quiet' : '');
+    if (opts.image) {
+        const img = document.createElement('img');
+        img.src = opts.image; img.alt = ''; img.className = opts.imageClass || '';
+        el.appendChild(img);
     }
-    
-    headerPokemon.src = getPokemonSpriteUrl(pokemonId);
-    headerPokemon.alt = 'Pokemon #' + pokemonId;
-}
-
-// Settings functions
-function openSettingsModal() {
-    const appName = localStorage.getItem(APP_NAME_KEY) || 'ToDoMon';
-    document.getElementById('settingsAppName').value = appName;
-    document.getElementById('settingsModal').classList.add('visible');
-}
-
-function closeSettingsModal() {
-    document.getElementById('settingsModal').classList.remove('visible');
-}
-
-function saveSettings() {
-    const newName = document.getElementById('settingsAppName').value.trim();
-    if (newName) {
-        localStorage.setItem(APP_NAME_KEY, newName);
-        document.querySelector('h1').textContent = newName;
-    }
-    
-    // Generar nuevo Pokémon aleatorio para el header
-    const newPokemonId = getRandomHeaderPokemon();
-    localStorage.setItem(HEADER_POKEMON_KEY, newPokemonId);
-    updateHeaderPokemon();
-    
-    closeSettingsModal();
-}
-
-// Modificar wakeUp para actualizar el Pokémon del header
-const originalWakeUp = wakeUp;
-wakeUp = function() {
-    originalWakeUp();
-    updateHeaderPokemon();
-};
-
-function getEvolutionChain(category, subtaskCount) {
-    const now = Date.now();
-    let chain, isItem = false, isShiny = false, noEvolution = false;
-
-    // CASE 1: 5+ subtasks -> Legendary Pokemon
-    if (subtaskCount >= 5) {
-        const legendaryIndex = now % LEGENDARY_POKEMON_EXTENDED.length;
-        chain = [LEGENDARY_POKEMON_EXTENDED[legendaryIndex]];
-        isShiny = category === 'ideas' && Math.random() < 0.3;
-        return { chain, isItem: false, isShiny, category, noEvolution: false };
-    }
-
-    // CASE 2: No subtasks -> Basic Pokemon (no evolution)
-    if (subtaskCount === 0) {
-        if (category === 'someday') {
-            const itemIndex = now % ADVENTURE_ITEMS.length;
-            return {
-                chain: [ADVENTURE_ITEMS[itemIndex]],
-                isItem: true,
-                isShiny: false,
-                category,
-                noEvolution: true
-            };
+    const text = document.createElement('span');
+    text.className = 'toast-text';
+    // {pkmn} se reemplaza por el nombre del Pokémon (se actualiza solo cuando llega desde PokeAPI)
+    String(message).split('{pkmn}').forEach(function (part, i) {
+        if (i > 0) {
+            const n = document.createElement('span');
+            n.dataset.nameId = opts.pokemonId;
+            n.textContent = pokemonLabel(opts.pokemonId);
+            text.appendChild(n);
         }
-
-        const pool = getCategoryPokemonPool(category);
-        const basicIndex = (now + 7) % pool.length;
-        const basicPokemon = pool[basicIndex];
-
-        return {
-            chain: [basicPokemon],
-            isItem: false,
-            isShiny: category === 'ideas' && Math.random() < 0.3,
-            category,
-            noEvolution: true
-        };
-    }
-
-    // CASE 3: 1-4 subtasks -> Evolution chain
-    if (category === 'someday') {
-        isItem = true;
-        const items = [];
-        const startIndex = now % ADVENTURE_ITEMS.length;
-        for (let i = 0; i < Math.min(3, subtaskCount + 1); i++) {
-            items.push(ADVENTURE_ITEMS[(startIndex + i) % ADVENTURE_ITEMS.length]);
-        }
-        chain = items;
-    } else if (category === 'work') {
-        const keys = Object.keys(GYM_EVOLUTIONS);
-        chain = GYM_EVOLUTIONS[keys[(now + subtaskCount) % keys.length]];
-    } else if (category === 'ideas') {
-        const randomIndex = (now + subtaskCount) % ASH_POKEMON.length;
-        const pokemonId = ASH_POKEMON[randomIndex];
-        isShiny = Math.random() < 0.3;
-
-        chain = [pokemonId];
-        for (const key in GYM_EVOLUTIONS) {
-            const evoChain = GYM_EVOLUTIONS[key];
-            if (evoChain.includes(pokemonId)) {
-                chain = evoChain;
-                break;
-            }
-        }
-    } else {
-        chain = getEvolutionChainFromPool(category, now, subtaskCount);
-    }
-
-    return { chain, isItem, isShiny, category, noEvolution: false };
-}
-
-// NEW HELPER: Get category-specific Pokemon pool
-function getCategoryPokemonPool(category) {
-    const pools = {
-        urgent: FIRE_TYPES,
-        work: Object.values(GYM_EVOLUTIONS).flat(),
-        personal: FRIENDLY_TYPES,
-        learning: PSYCHIC_TYPES,
-        ideas: ASH_POKEMON,
-        someday: ADVENTURE_ITEMS
-    };
-    return pools[category] || FIRE_TYPES;
-}
-
-// NEW HELPER: Get evolution chain from pool
-function getEvolutionChainFromPool(category, seed, subtaskCount) {
-    const pool = getCategoryPokemonPool(category);
-
-    const possibleChains = [];
-    Object.values(GYM_EVOLUTIONS).forEach(function (chain) {
-        if (pool.includes(chain[0])) {
-            possibleChains.push(chain);
-        }
+        text.appendChild(document.createTextNode(part));
     });
-
-    if (possibleChains.length > 0) {
-        return possibleChains[(seed + subtaskCount) % possibleChains.length];
+    el.appendChild(text);
+    if (opts.action) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'toast-action';
+        btn.textContent = opts.action.label;
+        btn.addEventListener('click', function () { opts.action.run(); dismiss(); });
+        el.appendChild(btn);
     }
-
-    return [pool[seed % pool.length]];
-}
-
-function getEvolutionStage(evolutionData, completedCount, totalCount) {
-    if (evolutionData.isItem) {
-        const progress = totalCount > 0 ? completedCount / totalCount : 0;
-        const itemIndex = Math.min(Math.floor(progress * evolutionData.chain.length), evolutionData.chain.length - 1);
-        return { stage: itemIndex, item: evolutionData.chain[itemIndex] };
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'toast-close';
+    close.setAttribute('aria-label', 'Cerrar aviso');
+    close.textContent = '✕';
+    close.addEventListener('click', function () { dismiss(); });
+    el.appendChild(close);
+    box.appendChild(el);
+    while (box.children.length > 4) box.removeChild(box.firstChild);
+    const timer = setTimeout(dismiss, opts.duration || (opts.action ? 8000 : 4500));
+    function dismiss() {
+        clearTimeout(timer);
+        if (el.contains(document.activeElement)) { const m = $('main'); if (m) m.focus({ preventScroll: true }); }
+        el.remove();
     }
+    return el;
+}
 
-    const percentage = totalCount > 0 ? completedCount / totalCount : 0;
+// ========== TEMA / SONIDO ==========
+function isNight() { const h = new Date().getHours(); return h >= 20 || h < 7; }
 
-    if (percentage >= 1 && evolutionData.chain.length > 0) {
-        return { stage: evolutionData.chain.length, pokemonId: evolutionData.chain[evolutionData.chain.length - 1] };
-    } else if (percentage >= 0.5 && evolutionData.chain.length >= 2) {
-        return { stage: Math.floor(evolutionData.chain.length / 2), pokemonId: evolutionData.chain[Math.floor(evolutionData.chain.length / 2)] };
-    } else {
-        return { stage: 0, pokemonId: evolutionData.chain[0] };
+function applyTheme() {
+    const mode = state.settings.theme;
+    const dark = mode === 'dark' || (mode === 'auto' && isNight());
+    document.body.classList.toggle('dark-mode', dark);
+    const btn = $('themeBtn');
+    btn.textContent = THEME_ICONS[mode];
+    btn.setAttribute('aria-label', 'Tema: ' + THEME_LABELS[mode] + '. Cambiar tema');
+    btn.title = 'Tema: ' + THEME_LABELS[mode];
+}
+
+function cycleTheme() {
+    const order = ['auto', 'light', 'dark'];
+    state.settings.theme = order[(order.indexOf(state.settings.theme) + 1) % order.length];
+    saveState();
+    applyTheme();
+    announce('Tema ' + THEME_LABELS[state.settings.theme]);
+}
+
+function applySound() {
+    AudioSystem.enabled = !!state.settings.sound;
+    const btn = $('soundBtn');
+    btn.textContent = state.settings.sound ? '🔊' : '🔇';
+    btn.setAttribute('aria-pressed', String(!!state.settings.sound));
+    btn.setAttribute('aria-label', state.settings.sound ? 'Sonido activado' : 'Sonido desactivado');
+    btn.title = btn.getAttribute('aria-label');
+}
+
+// ========== CABECERA ==========
+function renderHeader() {
+    const info = levelInfo();
+    const streak = getStreak();
+    $('chipLevel').textContent = info.level;
+    $('chipXpFill').style.width = Math.round((info.into / info.span) * 100) + '%';
+    $('chipStreak').textContent = streak.current;
+    $('chipXpText').textContent = ', faltan ' + info.toNext + ' XP para subir de nivel,';
+    $('appTitle').textContent = state.settings.appName || 'ToDoMon';
+    document.title = state.settings.appName || 'ToDoMon';
+    setPokemonSprite($('brandPartner'), state.trainer.partnerId, false);
+}
+
+// ========== TAREAS ==========
+function taskMatches(task, category) {
+    if (ui.category !== 'all' && ui.category !== category) return false;
+    const st = dueStatus(task);
+    switch (ui.status) {
+        case 'pending': if (task.completed) return false; break;
+        case 'done': if (!task.completed) return false; break;
+        case 'today': if (task.completed || (st !== 'today' && st !== 'overdue')) return false; break;
+        case 'overdue': if (st !== 'overdue') return false; break;
     }
-}
-
-function getPokemonSpriteUrl(pokemonId) {
-    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + pokemonId + '.png';
-}
-
-function getShinySpriteUrl(pokemonId) {
-    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/' + pokemonId + '.png';
-}
-
-function getPokemonCryUrl(pokemonId) {
-    return 'https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/' + pokemonId + '.ogg';
-}
-
-const AudioSystem = {
-    sounds: {}, initialized: false,
-
-    async init() {
-        if (this.initialized) return;
-        const essentialSounds = [
-            { key: 'add', id: 257 }, { key: 'complete', id: 248 },
-            { key: 'delete', id: 530 }, { key: 'levelUp', id: 133 }
-        ];
-        for (const sound of essentialSounds) {
-            try {
-                const audio = new Audio();
-                audio.src = getPokemonCryUrl(sound.id);
-                audio.preload = 'auto';
-                this.sounds[sound.key] = audio;
-            } catch (e) { console.warn('Error:', e); }
-        }
-        this.initialized = true;
-    },
-
-    play(key) {
-        if (!this.sounds[key]) return;
-        const audio = this.sounds[key].cloneNode();
-        audio.volume = 0.5;
-        audio.play().catch(e => { });
-    },
-
-    playPokemonCry(pokemonId) {
-        const audio = new Audio(getPokemonCryUrl(pokemonId));
-        audio.volume = 0.6;
-        audio.play().catch(e => { });
+    if (ui.search) {
+        const q = normalizeText(ui.search);
+        const pid = getTaskPokemonId(task);
+        const hay = normalizeText(task.title + ' ' + task.description + ' ' + task.subtasks.map(function (s) { return s.title; }).join(' ') +
+            ' ' + (pid ? pokemonLabel(pid) : (task.currentItem ? task.currentItem.name : '')));
+        if (hay.indexOf(q) === -1) return false;
     }
-};
-
-let currentCategory = 'urgent';
-let tasks = { urgent: [], work: [], personal: [], learning: [], ideas: [], someday: [] };
-let trainerLevel = 1;
-let editingTaskId = null;
-let darkMode = false;
-let tempSubtasks = [];
-let newTaskModalSubtasks = [];
-let collapsedCategories = JSON.parse(localStorage.getItem('todopkmn_collapsed') || '[]');
-
-document.addEventListener('DOMContentLoaded', function () {
-    // Cargar nombre de la app guardado
-    const savedAppName = localStorage.getItem(APP_NAME_KEY);
-    if (savedAppName) {
-        document.querySelector('h1').textContent = savedAppName;
-    }
-    
-    // Actualizar Pokémon del header (mostrará Pokéball si está dormido)
-    updateHeaderPokemon();
-    
-    loadData();
-    setupEventListeners();
-    try {
-        renderAllTasks();
-    } catch (e) {
-        console.error('Error rendering tasks:', e);
-    }
-
-    try {
-        updateStats();
-    } catch (e) {
-        console.error('Error updating stats:', e);
-    }
-    AudioSystem.init();
-    initDarkMode();
-    initCollapsedCategories();
-
-    // Render Pokédex Dashboard
-    renderPokedex();
-    updatePokedexNames();
-
-    // Render habitat inmediatamente (en modo sleep por defecto)
-    renderPokemonHabitat();
-
-    // Init Sleep Mode
-    initSleepMode();
-
-    // Legacy task input (alternative method)
-    document.getElementById('addTaskBtn')?.addEventListener('click', addTask);
-});
-
-// --- SLEEP MODE LOGIC ---
-let isSleeping = true;
-
-function initSleepMode() {
-    isSleeping = true;
-    document.body.classList.add('sleeping');
-    document.getElementById('pokemonHabitat').classList.add('sleeping');
-
-    // Play intro sound (optional) or just wait for interaction
-
-    // One-time interaction listener to wake up
-    document.addEventListener('click', wakeUp, { once: true });
-    document.addEventListener('keydown', wakeUp, { once: true });
-    document.addEventListener('touchstart', wakeUp, { once: true });
+    return true;
 }
 
-function wakeUp() {
-    if (!isSleeping) return;
+function filtersActive() { return ui.search !== '' || ui.status !== 'all' || ui.category !== 'all'; }
+function canReorder() { return state.settings.sort === 'manual' && ui.search === '' && ui.status === 'all'; }
 
-    console.log('Waking up...');
-    isSleeping = false;
-
-    document.body.classList.remove('sleeping');
-    document.getElementById('pokemonHabitat').classList.remove('sleeping');
-
-    // Play cheerful sound
-    try {
-        const audio = new Audio('https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/25.ogg'); // Pikachu cry
-        audio.volume = 0.3;
-        audio.play().catch(e => console.log('Audio autoplay prevented'));
-    } catch (e) { }
-
-    // Helper text removal handled by CSS class toggle
-
-    // Force re-render to start animations correctly
-    renderPokemonHabitat();
-}
-
-function initDarkMode() {
-    const savedDarkMode = localStorage.getItem(DARK_MODE_KEY);
-    if (savedDarkMode === 'true') {
-        darkMode = true;
-        document.body.classList.add('dark-mode');
-    }
-}
-
-function toggleDarkMode() {
-    darkMode = !darkMode;
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem(DARK_MODE_KEY, darkMode);
-}
-
-function setupEventListeners() {
-    // Settings button
-    document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
-    
-    // Settings modal events
-    document.getElementById('closeSettings').addEventListener('click', closeSettingsModal);
-    document.getElementById('saveSettings').addEventListener('click', saveSettings);
-    document.getElementById('settingsModal').addEventListener('click', function (e) {
-        if (e.target === e.currentTarget) closeSettingsModal();
-    });
-    
-    // Dark mode always on - no toggle needed
-
-    // Category buttons (for visual selection)
-    document.querySelectorAll('.category-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () { setCategory(btn.dataset.category); });
-    });
-
-    // Pokéball buttons - abrir modal de nueva tarea
-    document.querySelectorAll('.pokeball-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            openNewTaskModal(btn.dataset.category);
-        });
-    });
-
-    // Category headers - colapsar/expandir
-    document.querySelectorAll('.task-category.collapsible .category-header').forEach(function (header) {
-        header.addEventListener('click', function (e) {
-            // Don't collapse if clicking on the pokeball button
-            if (e.target.closest('.pokeball-btn')) return;
-            toggleCategoryCollapse(header.dataset.category);
-        });
-    });
-
-    // New Task Modal events
-    document.getElementById('cancelNewTask').addEventListener('click', closeNewTaskModal);
-    document.getElementById('saveNewTask').addEventListener('click', saveNewTask);
-    document.getElementById('newTaskModal').addEventListener('click', function (e) {
-        if (e.target === e.currentTarget) closeNewTaskModal();
-    });
-
-    document.getElementById('newTaskAddSubtaskBtn').addEventListener('click', addNewTaskSubtaskChip);
-    document.getElementById('newTaskSubtaskInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') addNewTaskSubtaskChip();
-    });
-
-    // Edit Modal events
-    document.getElementById('cancelEdit').addEventListener('click', closeEditModal);
-    document.getElementById('saveEdit').addEventListener('click', saveEdit);
-    document.getElementById('editModal').addEventListener('click', function (e) {
-        if (e.target === e.currentTarget) closeEditModal();
+function sortTasks(list) {
+    const sort = state.settings.sort;
+    if (sort === 'manual') return list;
+    return list.slice().sort(function (a, b) {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        const da = a.due || '9999-99-99', db = b.due || '9999-99-99';
+        const pa = PRIORITIES[a.priority].rank, pb = PRIORITIES[b.priority].rank;
+        if (sort === 'due') return da < db ? -1 : da > db ? 1 : pa - pb;
+        return pa !== pb ? pa - pb : (da < db ? -1 : da > db ? 1 : 0);
     });
 }
 
-function setCategory(categoryId) {
-    currentCategory = categoryId;
-    document.querySelectorAll('.category-btn').forEach(function (btn) {
-        btn.classList.remove('active');
-        if (btn.dataset.category === categoryId) btn.classList.add('active');
+function renderSummary() {
+    const today = todayStr();
+    let pending = 0, dueToday = 0, overdue = 0, doneToday = 0;
+    allTasks().forEach(function (x) {
+        const t = x.task;
+        const st = dueStatus(t, today);
+        if (!t.completed) pending++;
+        if (st === 'today') dueToday++;
+        if (st === 'overdue') overdue++;
+        if (t.completed && t.completedAt && isoToDateStr(t.completedAt) === today) doneToday++;
     });
-}
-
-function addSubtaskChip() {
-    const input = document.getElementById('newSubtaskInput');
-    const title = input.value.trim();
-    if (!title) return;
-
-    tempSubtasks.push({ id: generateId(), title: title, completed: false });
-    input.value = '';
-    renderSubtaskChips();
-    input.focus();
-}
-
-function removeSubtaskChip(id) {
-    tempSubtasks = tempSubtasks.filter(function (s) { return s.id !== id; });
-    renderSubtaskChips();
-}
-
-function renderSubtaskChips() {
-    const container = document.getElementById('subtaskChips');
-
-    if (tempSubtasks.length === 0) {
-        container.innerHTML = '<span class="no-subtasks">Sin sub-tareas aún</span>';
-        return;
-    }
-
-    container.innerHTML = tempSubtasks.map(function (subtask) {
-        return '<div class="subtask-chip" data-id="' + subtask.id + '">' +
-            '<span>' + escapeHTML(subtask.title) + '</span>' +
-            '<button class="chip-delete" onclick="removeSubtaskChip(\'' + subtask.id + '\')">×</button>' +
-            '</div>';
-    }).join('');
-}
-
-function addTask() {
-    const input = document.getElementById('taskInput');
-    const descriptionInput = document.getElementById('taskDescription');
-
-    const title = input.value.trim();
-    const description = descriptionInput.value.trim();
-
-    if (!title) {
-        input.style.borderColor = '#D32F2F';
-        setTimeout(function () { input.style.borderColor = ''; }, 1000);
-        return;
-    }
-
-    const subtasks = [...tempSubtasks];
-    const evolutionData = getEvolutionChain(currentCategory, subtasks.length);
-
-    const task = {
-        id: generateId(),
-        title: title,
-        description: description,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        subtasks: subtasks,
-        evolutionData: evolutionData,
-        currentPokemonId: evolutionData.isItem ? null : evolutionData.chain[0],
-        currentItem: evolutionData.isItem ? evolutionData.chain[0] : null,
-        progress: 0
-    };
-
-    tasks[currentCategory].unshift(task);
-    saveData();
-    renderTasks(currentCategory);
-    updateStats();
-
-    AudioSystem.play('add');
-    if (!evolutionData.isItem) AudioSystem.playPokemonCry(task.currentPokemonId);
-
-    input.value = '';
-    descriptionInput.value = '';
-    tempSubtasks = [];
-    renderSubtaskChips();
-    input.focus();
-
-    // Force wake up on interaction
-    if (isSleeping) wakeUp();
-}
-
-function toggleTask(category, taskId) {
-    const taskIndex = tasks[category].findIndex(function (t) { return t.id === taskId; });
-    if (taskIndex !== -1) {
-        tasks[category][taskIndex].completed = !tasks[category][taskIndex].completed;
-        saveData();
-        renderTasks(category);
-        updateStats();
-
-        const task = tasks[category][taskIndex];
-        if (tasks[category][taskIndex].completed) {
-            AudioSystem.play('complete');
-            if (task.evolutionData && !task.evolutionData.isItem) {
-                AudioSystem.playPokemonCry(task.evolutionData.chain[task.evolutionData.chain.length - 1]);
-            }
-        }
-    }
-}
-
-function toggleSubtask(category, taskId, subtaskId) {
-    const task = tasks[category].find(function (t) { return t.id === taskId; });
-    if (!task || !task.subtasks) return;
-
-    const subtask = task.subtasks.find(function (s) { return s.id === subtaskId; });
-    if (!subtask) return;
-
-    subtask.completed = !subtask.completed;
-
-    const completedCount = task.subtasks.filter(function (s) { return s.completed; }).length;
-    const totalCount = task.subtasks.length;
-    task.progress = completedCount;
-
-    const evolution = getEvolutionStage(task.evolutionData, completedCount, totalCount);
-
-    if (task.evolutionData.isItem) {
-        task.currentItem = evolution.item;
-    } else {
-        task.currentPokemonId = evolution.pokemonId;
-    }
-
-    if (completedCount === totalCount && totalCount > 0) {
-        task.completed = true;
-        AudioSystem.play('levelUp');
-        if (!task.evolutionData.isItem) AudioSystem.playPokemonCry(evolution.pokemonId);
-    } else if (completedCount > 0) {
-        if (!task.evolutionData.isItem) AudioSystem.playPokemonCry(evolution.pokemonId);
-    }
-
-    saveData();
-    renderTasks(category);
-    updateStats();
-    renderPokemonHabitat();
-    renderPokedex();
-
-    // Force wake up on interaction
-    if (isSleeping) wakeUp();
-}
-
-function deleteTask(category, taskId) {
-    tasks[category] = tasks[category].filter(function (t) { return t.id !== taskId; });
-    saveData();
-    renderTasks(category);
-    updateStats();
-    renderTasks(category);
-    updateStats();
-    renderPokemonHabitat();
-    renderPokedex();
-    AudioSystem.play('delete');
-
-    // Force wake up on interaction
-    if (isSleeping) wakeUp();
-}
-
-function openEditModal(category, taskId) {
-    const task = tasks[category].find(function (t) { return t.id === taskId; });
-    if (!task) return;
-    editingTaskId = { category: category, taskId: taskId };
-    document.getElementById('editTaskInput').value = task.title;
-    document.getElementById('editTaskDescription').value = task.description || '';
-
-    // Render subtasks in edit modal
-    renderEditModalSubtasks(task);
-
-    document.getElementById('editModal').classList.add('visible');
-    setTimeout(function () { document.getElementById('editTaskInput').focus(); }, 100);
-}
-
-let editModalSubtasks = [];
-
-function renderEditModalSubtasks(task) {
-    editModalSubtasks = task.subtasks ? [...task.subtasks] : [];
-
-    const container = document.getElementById('editTaskSubtaskChips');
-    if (!container) {
-        // Create container if doesn't exist
-        const descriptionGroup = document.getElementById('editTaskDescription').closest('.description-group');
-        if (descriptionGroup) {
-            const subtaskSection = document.createElement('div');
-            subtaskSection.className = 'subtasks-input-section';
-            subtaskSection.innerHTML = `
-                <label class="subtasks-label">Sub-tareas:</label>
-                <div class="subtask-chips" id="editTaskSubtaskChips"></div>
-                <div class="add-subtask-row">
-                    <input type="text" id="editTaskSubtaskInput" placeholder="Nueva sub-tarea..." maxlength="50">
-                    <button id="editTaskAddSubtaskBtn" class="add-subtask-btn">+</button>
-                </div>
-            `;
-            descriptionGroup.after(subtaskSection);
-
-            // Add event listeners
-            document.getElementById('editTaskAddSubtaskBtn').addEventListener('click', addEditTaskSubtask);
-            document.getElementById('editTaskSubtaskInput').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') addEditTaskSubtask();
-            });
-        }
-    }
-
-    const chipsContainer = document.getElementById('editTaskSubtaskChips');
-    if (editModalSubtasks.length === 0) {
-        chipsContainer.innerHTML = '<span class="no-subtasks">Sin sub-tareas aún</span>';
-    } else {
-        chipsContainer.innerHTML = editModalSubtasks.map(function (subtask, index) {
-            return '<div class="subtask-chip" data-id="' + subtask.id + '">' +
-                '<span>' + escapeHTML(subtask.title) + '</span>' +
-                '<button class="chip-delete" onclick="removeEditTaskSubtask(\'' + subtask.id + '\')">×</button>' +
-                '</div>';
+    const tiles = [
+        { id: 'pending', n: pending, label: 'Pendientes' },
+        { id: 'today', n: dueToday, label: 'Para hoy' },
+        { id: 'overdue', n: overdue, label: 'Vencidas', alert: overdue > 0 },
+        { id: 'done', n: doneToday, label: 'Hechas hoy' }
+    ];
+    withFocus(function () {
+        $('summary').innerHTML = tiles.map(function (t) {
+            return '<button type="button" class="tile' + (t.alert ? ' tile-alert' : '') + (ui.status === t.id ? ' is-active' : '') +
+                '" data-status="' + t.id + '" data-focus="tile-' + t.id + '" aria-pressed="' + (ui.status === t.id) + '">' +
+                '<span class="tile-n">' + t.n + '</span><span class="tile-label">' + t.label + '</span></button>';
         }).join('');
-    }
+    });
 }
 
-function addEditTaskSubtask() {
-    const input = document.getElementById('editTaskSubtaskInput');
-    const title = input.value.trim();
-    if (!title) return;
-
-    editModalSubtasks.push({ id: generateId(), title: title, completed: false });
-    input.value = '';
-    renderEditModalSubtasksChips();
-    input.focus();
-}
-
-function removeEditTaskSubtask(id) {
-    editModalSubtasks = editModalSubtasks.filter(function (s) { return s.id !== id; });
-    renderEditModalSubtasksChips();
-}
-
-function renderEditModalSubtasksChips() {
-    const container = document.getElementById('editTaskSubtaskChips');
-    if (!container) return;
-
-    if (editModalSubtasks.length === 0) {
-        container.innerHTML = '<span class="no-subtasks">Sin sub-tareas aún</span>';
-    } else {
-        container.innerHTML = editModalSubtasks.map(function (subtask) {
-            return '<div class="subtask-chip" data-id="' + subtask.id + '">' +
-                '<span>' + escapeHTML(subtask.title) + '</span>' +
-                '<button class="chip-delete" onclick="removeEditTaskSubtask(\'' + subtask.id + '\')">×</button>' +
-                '</div>';
+function renderFilters() {
+    withFocus(function () {
+        $('statusFilters').innerHTML = STATUS_FILTERS.map(function (f) {
+            return '<button type="button" class="chip' + (ui.status === f.id ? ' is-active' : '') + '" aria-pressed="' + (ui.status === f.id) +
+                '" data-status="' + f.id + '" data-focus="st-' + f.id + '">' + f.label + '</button>';
         }).join('');
+        $('categoryFilters').innerHTML = '<button type="button" class="chip' + (ui.category === 'all' ? ' is-active' : '') +
+            '" aria-pressed="' + (ui.category === 'all') + '" data-cat="all" data-focus="cf-all">Todas las categorías</button>' +
+            ALL_CATEGORY_IDS.map(function (c) {
+                const cat = CATEGORIES[c];
+                return '<button type="button" class="chip chip-cat' + (ui.category === c ? ' is-active' : '') + '" style="--cat:' + cat.color +
+                    '" aria-pressed="' + (ui.category === c) + '" data-cat="' + c + '" data-focus="cf-' + c + '"><span aria-hidden="true">' +
+                    cat.emoji + '</span> ' + cat.name + '</button>';
+            }).join('');
+    });
+    $('sortSelect').value = state.settings.sort;
+}
+
+function taskSpriteHTML(task) {
+    const pid = getTaskPokemonId(task);
+    if (pid) {
+        const shiny = !!task.evolutionData.isShiny;
+        return '<div class="task-sprite">' + pokemonImgHTML(pid, shiny, 'card-sprite', '') +
+            '<span class="sprite-name">' + (shiny ? '<span class="shiny-star" title="Variocolor">✨</span>' : '') + nameSpan(pid) + '</span>' +
+            '<span class="sprite-id">#' + String(pid).padStart(3, '0') + '</span></div>';
     }
+    const item = task.currentItem || {};
+    return '<div class="task-sprite"><img class="item-sprite" src="' + escapeHTML(item.sprite || POKEBALL_SPRITE) + '" alt="" width="30" height="30">' +
+        '<span class="sprite-name">' + escapeHTML(item.name || 'Objeto') + '</span><span class="sprite-id">Objeto</span></div>';
 }
 
-function closeEditModal() {
-    document.getElementById('editModal').classList.remove('visible');
-    editingTaskId = null;
+function taskCardHTML(task, category, reorder) {
+    const id = task.id;
+    const t = escapeHTML(task.title);
+    const st = dueStatus(task);
+    const total = task.subtasks.length;
+    const pct = total ? Math.round((task.progress / total) * 100) : (task.completed ? 100 : 0);
+    const prio = PRIORITIES[task.priority];
+    const cat = CATEGORIES[category];
+    const meta = [];
+    if (ui.category === 'all' && filtersActive()) meta.push('<span class="meta meta-cat" style="--cat:' + cat.color + '">' + cat.emoji + ' ' + cat.name + '</span>');
+    if (task.priority !== 'normal') meta.push('<span class="meta meta-prio prio-' + task.priority + '"><span aria-hidden="true">' + prio.icon + '</span> Prioridad ' + prio.label.toLowerCase() + '</span>');
+    if (st) meta.push('<span class="meta meta-due due-' + st + '"><span aria-hidden="true">📅</span> ' + (st === 'done' ? formatDate(task.due) : dueLabel(task)) + '</span>');
+    if (task.recurrence !== 'none') meta.push('<span class="meta meta-rec"><span aria-hidden="true">🔁</span> ' + RECURRENCES[task.recurrence].label + '</span>');
+    if (total) meta.push('<span class="meta meta-progress">' + task.progress + '/' + total + ' subtareas</span>');
+
+    const subs = total ? '<ul class="subtask-list">' + task.subtasks.map(function (s) {
+        return '<li class="subtask' + (s.completed ? ' done' : '') + '"><label><input type="checkbox" data-action="toggle-sub" data-sub="' + escapeHTML(s.id) +
+            '" data-focus="sub-' + id + '-' + escapeHTML(s.id) + '"' + (s.completed ? ' checked' : '') + '> <span>' + escapeHTML(s.title) + '</span></label></li>';
+    }).join('') + '</ul>' : '';
+
+    return '<li class="task-card prio-' + task.priority + (st ? ' due-' + st : '') + (task.completed ? ' is-done' : '') +
+        (ui.celebrate === id ? ' celebrate' : '') + '" data-task-id="' + id + '" data-category="' + category + '">' +
+        (reorder ? '<button type="button" class="drag-handle" data-action="drag" data-focus="drag-' + id + '" aria-label="Reordenar «' + t +
+            '». Flechas arriba y abajo para mover" title="Arrastra o usa las flechas">⋮⋮</button>' : '') +
+        '<input type="checkbox" class="task-check" data-action="toggle-task" data-focus="check-' + id + '" aria-label="' +
+        (task.completed ? 'Marcar como pendiente: ' : 'Completar: ') + t + '"' + (task.completed ? ' checked' : '') + '>' +
+        '<div class="task-body">' +
+        '<button type="button" class="task-title" data-action="open" data-focus="open-' + id + '" aria-label="' + t + '. Abrir detalles">' + t + '</button>' +
+        (task.description ? '<p class="task-desc">' + escapeHTML(task.description) + '</p>' : '') +
+        (meta.length ? '<div class="task-meta">' + meta.join('') + '</div>' : '') +
+        subs +
+        (total ? '<div class="progress" role="progressbar" aria-label="Progreso de ' + t + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct +
+            '"><span style="width:' + pct + '%"></span></div>' : '') +
+        '</div>' +
+        taskSpriteHTML(task) +
+        '<button type="button" class="icon-btn task-delete" data-action="delete" data-focus="del-' + id + '" aria-label="Eliminar «' + t + '»" title="Eliminar">🗑️</button>' +
+        '</li>';
 }
 
-function saveEdit() {
-    if (!editingTaskId) return;
-    const newTitle = document.getElementById('editTaskInput').value.trim();
-    const newDescription = document.getElementById('editTaskDescription').value.trim();
-    if (!newTitle) {
-        document.getElementById('editTaskInput').style.borderColor = '#D32F2F';
-        setTimeout(function () { document.getElementById('editTaskInput').style.borderColor = ''; }, 1000);
+function renderTasks() {
+    const container = $('categoryList');
+    const total = allTasks().length;
+    const reorder = canReorder();
+    let shown = 0;
+    const html = ALL_CATEGORY_IDS.map(function (c) {
+        if (ui.category !== 'all' && ui.category !== c) return '';
+        const cat = CATEGORIES[c];
+        const list = state.tasks[c];
+        const visible = sortTasks(list.filter(function (t) { return taskMatches(t, c); }));
+        shown += visible.length;
+        if (filtersActive() && visible.length === 0) return '';
+        const done = list.filter(function (t) { return t.completed; }).length;
+        const collapsed = state.settings.collapsed.indexOf(c) !== -1;
+        return '<section class="category" data-category="' + c + '" style="--cat:' + cat.color + ';--cat2:' + cat.color2 + '">' +
+            '<h2 class="category-head"><button type="button" class="category-toggle" data-action="collapse" data-cat="' + c + '" data-focus="cat-' + c +
+            '" aria-expanded="' + !collapsed + '" aria-controls="list-' + c + '">' +
+            '<span class="cat-icon">' + pokemonImgHTML(cat.pokemonId, false, 'cat-sprite', '') + '</span>' +
+            '<span class="cat-text"><span class="cat-name">' + cat.emoji + ' ' + cat.name + '</span><span class="cat-sub">' + cat.subtitle + '</span></span>' +
+            '<span class="cat-count" aria-label="' + done + ' de ' + list.length + ' completadas">' + done + '/' + list.length + '</span>' +
+            '<span class="cat-chevron" aria-hidden="true">▾</span></button></h2>' +
+            '<div class="category-body" id="list-' + c + '"' + (collapsed ? ' hidden' : '') + '>' +
+            (visible.length ? '<ul class="task-list" data-category="' + c + '">' + visible.map(function (t) { return taskCardHTML(t, c, reorder); }).join('') + '</ul>'
+                : '<p class="cat-empty">Sin misiones aquí. Prueba <code>#' + normalizeText(cat.name).replace(/\s/g, '') + '</code> en el agregado rápido.</p>') +
+            '</div></section>';
+    }).join('');
+    withFocus(function () { container.innerHTML = html; });
+    const empty = $('emptyState');
+    if (total === 0) { empty.hidden = false; $('emptyText').textContent = '¡Tu equipo está vacío! Escribe tu primera misión arriba y aparecerá un Pokémon salvaje.'; container.hidden = true; }
+    else if (shown === 0) { empty.hidden = false; $('emptyText').textContent = 'Ninguna tarea coincide con los filtros.'; container.hidden = false; }
+    else { empty.hidden = true; container.hidden = false; }
+    ui.celebrate = null;
+}
+
+function renderTasksView() {
+    renderSummary();
+    renderFilters();
+    renderTasks();
+    renderHabitat();
+}
+
+// ========== AGREGADO RÁPIDO ==========
+function parseQuickAdd(text) {
+    const out = { title: '', category: null, priority: null, due: null, recurrence: null };
+    const keep = [];
+    const today = todayStr();
+    text.split(/\s+/).forEach(function (tok) {
+        if (!tok) return;
+        const n = normalizeText(tok);
+        const body = n.slice(1);
+        if (n[0] === '#' && CATEGORY_ALIASES[body]) { out.category = CATEGORY_ALIASES[body]; return; }
+        if (n[0] === '!') {
+            if (body === 'alta' || body === 'high' || body === '!') { out.priority = 'high'; return; }
+            if (body === 'baja' || body === 'low') { out.priority = 'low'; return; }
+            if (body === 'media' || body === 'normal') { out.priority = 'normal'; return; }
+        }
+        if (n[0] === '@') {
+            if (body === 'hoy') { out.due = today; return; }
+            if (body === 'manana') { out.due = addDaysStr(today, 1); return; }
+            if (body === 'pasado') { out.due = addDaysStr(today, 2); return; }
+            if (body === 'semana') { out.due = addDaysStr(today, 7); return; }
+            if (WEEKDAYS[body] !== undefined) {
+                const diff = (WEEKDAYS[body] - new Date().getDay() + 7) % 7;
+                out.due = addDaysStr(today, diff); return;
+            }
+            if (isValidDateStr(body)) { out.due = body; return; }
+        }
+        if (n[0] === '*') {
+            if (body === 'diaria' || body === 'diario' || body === 'daily') { out.recurrence = 'daily'; return; }
+            if (body === 'semanal' || body === 'weekly') { out.recurrence = 'weekly'; return; }
+        }
+        keep.push(tok);
+    });
+    out.title = keep.join(' ').trim();
+    return out;
+}
+
+function onQuickAdd(e) {
+    e.preventDefault();
+    const input = $('qaTitle');
+    const parsed = parseQuickAdd(input.value);
+    if (!parsed.title) {
+        showToast('Escribe un nombre para la misión.', { kind: 'warn' });
+        input.focus();
         return;
     }
-    const taskIndex = tasks[editingTaskId.category].findIndex(function (t) { return t.id === editingTaskId.taskId; });
-    if (taskIndex !== -1) {
-        tasks[editingTaskId.category][taskIndex].title = newTitle;
-        tasks[editingTaskId.category][taskIndex].description = newDescription;
-
-        // Save subtasks from edit modal
-        const oldSubtaskCount = tasks[editingTaskId.category][taskIndex].subtasks.length;
-        tasks[editingTaskId.category][taskIndex].subtasks = [...editModalSubtasks];
-
-        // If subtask count changed, recalculate evolution stage but KEEP original Pokemon
-        if (editModalSubtasks.length !== oldSubtaskCount) {
-            const task = tasks[editingTaskId.category][taskIndex];
-            
-            // Get current progress to recalculate evolution stage
-            const completedCount = task.subtasks.filter(s => s.completed).length;
-            
-            // Recalculate the evolution stage based on progress, but keep the original chain
-            const evolution = getEvolutionStage(task.evolutionData, completedCount, editModalSubtasks.length);
-
-            if (task.evolutionData.isItem) {
-                task.currentItem = evolution.item;
-            } else {
-                task.currentPokemonId = evolution.pokemonId;
-            }
-        }
-
-        saveData();
-        renderTasks(editingTaskId.category);
-        updateStats();
-        renderPokemonHabitat();
-        renderPokedex();
-    }
-    closeEditModal();
-}
-
-function renderAllTasks() {
-    Object.keys(CATEGORIES).forEach(function (category) { renderTasks(category); });
-    checkEmptyState();
-    renderSubtaskChips();
-}
-
-function renderTasks(category) {
-    const listElement = document.getElementById(CATEGORIES[category].listId);
-    const countElement = document.querySelector('.task-count[data-category="' + category + '"]');
-
-    if (!listElement) return;
-
-    const categoryTasks = tasks[category];
-    if (countElement) countElement.textContent = categoryTasks.length;
-
-    if (categoryTasks.length === 0) {
-        listElement.innerHTML = '';
-    } else {
-        listElement.innerHTML = categoryTasks.map(function (task) { return createTaskHTML(category, task); }).join('');
-
-        listElement.querySelectorAll('.task-item').forEach(function (item) {
-            const taskId = item.dataset.taskId;
-            const categoryAttr = item.dataset.category;
-            const hasSubtasks = item.classList.contains('has-subtasks');
-
-            // Solo agregar evento click si NO hay sub-tareas
-            if (!hasSubtasks) {
-                const checkbox = item.querySelector('.task-checkbox');
-                if (checkbox) {
-                    checkbox.addEventListener('click', function () { toggleTask(categoryAttr, taskId); });
-                }
-            }
-
-            item.querySelector('.edit-btn').addEventListener('click', function () { openEditModal(categoryAttr, taskId); });
-            item.querySelector('.delete-btn').addEventListener('click', function () {
-                if (confirm('¿Eliminar esta tarea?')) deleteTask(categoryAttr, taskId);
-            });
-
-            item.querySelectorAll('.subtask-mini').forEach(function (miniItem) {
-                const checkbox = miniItem.querySelector('.mini-checkbox');
-                if (checkbox) {
-                    checkbox.addEventListener('click', function () {
-                        toggleSubtask(categoryAttr, taskId, checkbox.dataset.subtaskId);
-                    });
-                }
-            });
-        });
-    }
-    checkEmptyState();
-}
-
-function createTaskHTML(category, task) {
-    const completedCount = task.subtasks ? task.subtasks.filter(function (s) { return s.completed; }).length : 0;
-    const totalCount = task.subtasks ? task.subtasks.length : 0;
-    const hasSubtasks = totalCount > 0;
-    const isFullyCompleted = hasSubtasks ? completedCount === totalCount : task.completed;
-    const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-
-    let taskClass = 'task-item';
-    if (hasSubtasks) taskClass += ' has-subtasks';
-    if (task.completed || isFullyCompleted) taskClass += ' completed';
-    if (hasSubtasks && isFullyCompleted) taskClass += ' task-complete shiny-complete';
-
-    // TASK 1: Pokemon mascot sprite
-    let pokemonSpriteHTML = '';
-    const validPokemonId = task.currentPokemonId || (task.evolutionData && !task.evolutionData.isItem ? task.evolutionData.chain[0] : null);
-
-    if (validPokemonId && !task.evolutionData.isItem) {
-        const spriteUrl = task.evolutionData.isShiny
-            ? getShinySpriteUrl(validPokemonId)
-            : getPokemonSpriteUrl(validPokemonId);
-
-        pokemonSpriteHTML = `
-            <div class="pokemon-mascot ${task.evolutionData.isShiny ? 'shiny' : ''}">
-                <img src="${spriteUrl}" alt="Pokemon ${validPokemonId}" class="mascot-sprite">
-            </div>
-        `;
-    } else if (task.evolutionData && task.evolutionData.isItem && task.currentItem) {
-        pokemonSpriteHTML = `
-            <div class="pokemon-mascot item">
-                <img src="${task.currentItem.sprite}" alt="${task.currentItem.name}" class="mascot-sprite mascot-item">
-            </div>
-        `;
-    }
-
-    // TASK 2: Visual Progress Bar for tasks with subtasks
-    let progressBadgeHTML = '';
-    if (hasSubtasks) {
-        progressBadgeHTML = `
-            <div class="task-progress">
-                <div class="progress-bar-mini">
-                    <div class="progress-fill-mini" style="width: ${percentage}%"></div>
-                </div>
-                <span class="progress-text-mini">${completedCount}/${totalCount}</span>
-            </div>
-        `;
-    }
-
-    // Checkbox - Only if no subtasks
-    let checkboxHTML = '';
-    if (!hasSubtasks) {
-        checkboxHTML = `<div class="task-checkbox ${isFullyCompleted ? 'checked' : ''}"></div>`;
-    }
-
-    // Subtasks HTML
-    let subtasksHTML = '';
-    if (hasSubtasks) {
-        subtasksHTML = '<div class="task-subtasks">';
-        task.subtasks.forEach(function (subtask) {
-            subtasksHTML += `
-                <div class="subtask-mini ${subtask.completed ? 'completed' : ''}">
-                    <div class="mini-checkbox ${subtask.completed ? 'checked' : ''}" data-subtask-id="${subtask.id}"></div>
-                    <span>${escapeHTML(subtask.title)}</span>
-                </div>
-            `;
-        });
-        subtasksHTML += '</div>';
-    }
-
-    // ACTION ICONS: Tm for Edit, Repel for Delete
-    // TM: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-normal.png
-    // Repel: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-repel.png
-
-    // TASK 3: Return Final Structure with Flex Header
-    return `
-        <li class="${taskClass}" 
-            data-task-id="${task.id}" 
-            data-category="${category}">
-            
-            <!-- Checkbox (if no subtasks) -->
-            ${checkboxHTML}
-            
-            <!-- Task content -->
-            <div class="task-content">
-                <div class="task-header-top">
-                    <!-- Title and Actions Row -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                        <div class="task-title" style="margin-bottom: 0;">${escapeHTML(task.title)}</div>
-                        
-                        <!-- Action buttons (Pokemon Item Icons) -->
-                        <div class="task-actions" style="position: static; opacity: 0.8; margin-left: 8px;">
-                            ${isFullyCompleted ? '<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png" class="pixel-icon-img" alt="Done" style="margin-right: 4px;" title="Completado">' : ''}
-                            <button class="action-btn edit-btn" title="Editar (TM)">
-                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-normal.png" class="pixel-icon-img" alt="Edit">
-                            </button>
-                            <button class="action-btn delete-btn" title="Eliminar (Repel)">
-                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-repel.png" class="pixel-icon-img" alt="Delete">
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                ${progressBadgeHTML}  <!-- Visual Bar below title -->
-                
-                ${task.description ? `<p class="task-description">${escapeHTML(task.description)}</p>` : ''}
-                
-                <!-- Subtasks -->
-                ${subtasksHTML}
-            </div>
-            
-            <!-- Pokemon mascot -->
-            ${pokemonSpriteHTML}  <!-- BOTTOM RIGHT -->
-        </li>
-    `;
-}
-
-function checkEmptyState() {
-    const totalTasks = Object.values(tasks).reduce(function (sum, arr) { return sum + arr.length; }, 0);
-    const emptyState = document.getElementById('emptyState');
-    emptyState.classList.toggle('visible', totalTasks === 0);
-}
-
-function updateStats() {
-    let taskCount = 0, taskCompleted = 0;
-
-    Object.values(tasks).forEach(function (categoryTasks) {
-        categoryTasks.forEach(function (task) {
-            taskCount++;
-            if (task.completed) taskCompleted++;
-        });
+    const recurrence = parsed.recurrence || $('qaRecurrence').value;
+    let due = parsed.due || $('qaDue').value || null;
+    if (recurrence !== 'none' && !due) due = todayStr();
+    const created = createTask({
+        title: parsed.title,
+        category: parsed.category || $('qaCategory').value,
+        priority: parsed.priority || $('qaPriority').value,
+        due: due,
+        recurrence: recurrence,
+        subtasks: $('qaSubtasks').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean)
     });
-
-    // Total only counts main tasks now
-    const total = taskCount;
-    const completed = taskCompleted;
-
-    document.getElementById('completedCount').textContent = completed;
-    document.getElementById('totalCount').textContent = total;
-
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    document.getElementById('progressFill').style.width = percentage + '%';
-    document.getElementById('progressText').textContent = percentage + '%';
-
-    // Trainer level based on main tasks completed
-    const newLevel = calculateTrainerLevel(completed);
-    if (newLevel > trainerLevel) AudioSystem.play('levelUp');
-    if (newLevel !== trainerLevel) {
-        trainerLevel = newLevel;
-        saveData();
-    }
-    document.getElementById('trainerLevel').textContent = trainerLevel;
-}
-
-function calculateTrainerLevel(completedCount) {
-    if (completedCount >= 150) return 10;
-    if (completedCount >= 100) return 9;
-    if (completedCount >= 80) return 8;
-    if (completedCount >= 60) return 7;
-    if (completedCount >= 45) return 6;
-    if (completedCount >= 30) return 5;
-    if (completedCount >= 20) return 4;
-    if (completedCount >= 10) return 3;
-    if (completedCount >= 5) return 2;
-    return 1;
-}
-
-function saveData() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-        localStorage.setItem(TRAINER_KEY, JSON.stringify(trainerLevel));
-    } catch (e) { console.error('Error:', e); }
-}
-
-function loadData() {
-    try {
-        const savedTasks = localStorage.getItem(STORAGE_KEY);
-        const savedLevel = localStorage.getItem(TRAINER_KEY);
-        if (savedTasks) {
-            tasks = JSON.parse(savedTasks);
-        } else {
-            tasks = { urgent: [], work: [], personal: [], learning: [], ideas: [], someday: [] };
-        }
-
-        // Always attempt to repair data, even if empty or just loaded
-        repairData();
-
-        if (savedLevel) trainerLevel = JSON.parse(savedLevel);
-    } catch (e) {
-        console.error('Error loading data:', e);
-        tasks = { urgent: [], work: [], personal: [], learning: [], ideas: [], someday: [] };
-        trainerLevel = 1;
-        // Try to save the clean state to fix persistent crash loops
-        saveData();
-    }
-}
-
-function repairData() {
-    let hasChanges = false;
-
-    // Ensure new categories exist
-    ['urgent', 'work', 'personal', 'learning', 'ideas', 'someday'].forEach(cat => {
-        if (!tasks[cat] || !Array.isArray(tasks[cat])) {
-            tasks[cat] = [];
-            hasChanges = true;
-        }
-    });
-
-    // Legacy category migration (gym → work, raid → ideas, adventure → someday)
-    if (tasks.gym && tasks.gym.length > 0) {
-        tasks.work = (tasks.work || []).concat(tasks.gym);
-        delete tasks.gym;
-        hasChanges = true;
-    }
-    if (tasks.raid && tasks.raid.length > 0) {
-        tasks.ideas = (tasks.ideas || []).concat(tasks.raid);
-        delete tasks.raid;
-        hasChanges = true;
-    }
-    if (tasks.adventure && tasks.adventure.length > 0) {
-        tasks.someday = (tasks.someday || []).concat(tasks.adventure);
-        delete tasks.adventure;
-        hasChanges = true;
-    }
-
-    Object.keys(tasks).forEach(category => {
-        tasks[category].forEach(task => {
-            // 1. Ensure subtasks array exists
-            if (!Array.isArray(task.subtasks)) {
-                task.subtasks = [];
-                hasChanges = true;
-            }
-
-            // 2. Repair evolutionData if missing or invalid
-            if (!task.evolutionData || !task.evolutionData.chain || !Array.isArray(task.evolutionData.chain)) {
-                console.warn('Reparing evolution data for:', task.title);
-                task.evolutionData = getEvolutionChain(category, task.subtasks.length);
-                hasChanges = true;
-            }
-
-            // 3. Ensure currentPokemonId exists for non-item tasks
-            if (!task.evolutionData.isItem && !task.currentPokemonId) {
-                // Determine correct stage based on current subtask progress
-                const completedSub = task.subtasks.filter(s => s.completed).length;
-                const totalSub = task.subtasks.length;
-                const evoInfo = getEvolutionStage(task.evolutionData, completedSub, totalSub);
-                task.currentPokemonId = evoInfo.pokemonId;
-                hasChanges = true;
-            }
-
-            // 4. FIX INCONSISTENT COMPLETION STATE
-            // If task has subtasks, its completion state MUST match subtasks state
-            if (task.subtasks.length > 0) {
-                const allSubCompleted = task.subtasks.every(s => s.completed);
-                if (task.completed !== allSubCompleted) {
-                    console.warn(`Fixing inconsistent completion for ${task.title}: was ${task.completed}, should be ${allSubCompleted}`);
-                    task.completed = allSubCompleted;
-                    hasChanges = true;
-                }
-            }
-        });
-    });
-
-    if (hasChanges) {
-        saveData();
-        console.log('Data repaired and saved.');
-    }
-}
-
-function generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
-function escapeHTML(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-// ========== NUEVAS FUNCIONES v5.0 ==========
-
-// Note: Los event listeners de collapse ya están en setupEventListeners()
-// No necesitamos duplicarlos aquí
-function setupNewEventListeners() {
-    // Los event listeners principales están en setupEventListeners()
-    // Aquí solo necesitamos los del modal que son únicos
-
-    // New Task Modal
-    document.getElementById('cancelNewTask').addEventListener('click', closeNewTaskModal);
-    document.getElementById('saveNewTask').addEventListener('click', saveNewTask);
-    document.getElementById('newTaskModal').addEventListener('click', function (e) {
-        if (e.target === e.currentTarget) closeNewTaskModal();
-    });
-
-    document.getElementById('newTaskAddSubtaskBtn').addEventListener('click', addNewTaskSubtaskChip);
-    document.getElementById('newTaskSubtaskInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') addNewTaskSubtaskChip();
-    });
-
-    // Edit Modal - subtasks
-    document.getElementById('editTaskAddSubtaskBtn').addEventListener('click', addEditTaskSubtask);
-    document.getElementById('editTaskSubtaskInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') addEditTaskSubtask();
-    });
-}
-
-// Actualizar setupEventListeners para incluir nuevas funciones
-const originalSetupEventListeners = setupEventListeners;
-setupEventListeners = function () {
-    originalSetupEventListeners();
-    setupNewEventListeners();
-};
-
-// Modal de Nueva Tarea
-function openNewTaskModal(category) {
-    currentCategory = category;
-
-    // Actualizar UI de categorías
-    document.querySelectorAll('.category-btn').forEach(function (btn) {
-        btn.classList.remove('active');
-        if (btn.dataset.category === category) btn.classList.add('active');
-    });
-
-    // Configurar modal
-    const categoryNames = {
-        urgent: '🔥 Urgente',
-        work: '💼 Trabajo',
-        personal: '🏠 Personal',
-        learning: '📚 Aprendizaje',
-        ideas: '💡 Ideas',
-        someday: '🌟 Algún Día'
-    };
-    document.getElementById('newTaskModalTitle').textContent = 'Nueva ' + categoryNames[category];
-    document.getElementById('newTaskCategory').value = category;
-
-    // Limpiar inputs
-    document.getElementById('newTaskInput').value = '';
-    document.getElementById('newTaskDescription').value = '';
-    newTaskModalSubtasks = [];
-    renderNewTaskSubtaskChips();
-
-    document.getElementById('newTaskModal').classList.add('visible');
-    setTimeout(function () { document.getElementById('newTaskInput').focus(); }, 100);
-}
-
-function closeNewTaskModal() {
-    document.getElementById('newTaskModal').classList.remove('visible');
-    newTaskModalSubtasks = [];
-}
-
-function saveNewTask() {
-    const title = document.getElementById('newTaskInput').value.trim();
-    const description = document.getElementById('newTaskDescription').value.trim();
-    const category = document.getElementById('newTaskCategory').value;
-
-    if (!title) {
-        document.getElementById('newTaskInput').style.borderColor = '#D32F2F';
-        setTimeout(function () { document.getElementById('newTaskInput').style.borderColor = ''; }, 1000);
-        return;
-    }
-
-    const subtasks = [...newTaskModalSubtasks];
-    const evolutionData = getEvolutionChain(category, subtasks.length);
-
-    const task = {
-        id: generateId(),
-        title: title,
-        description: description,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        subtasks: subtasks,
-        evolutionData: evolutionData,
-        currentPokemonId: evolutionData.isItem ? null : evolutionData.chain[0],
-        currentItem: evolutionData.isItem ? evolutionData.chain[0] : null,
-        progress: 0
-    };
-
-    tasks[category].unshift(task);
-    saveData();
-    renderTasks(category);
-    updateStats();
-    renderPokemonHabitat();
-    renderPokedex();
-
-    AudioSystem.play('add');
-    if (!evolutionData.isItem) AudioSystem.playPokemonCry(task.currentPokemonId);
-
-    closeNewTaskModal();
-}
-
-function addNewTaskSubtaskChip() {
-    const input = document.getElementById('newTaskSubtaskInput');
-    const title = input.value.trim();
-    if (!title) return;
-
-    newTaskModalSubtasks.push({ id: generateId(), title: title, completed: false });
+    saveState();
     input.value = '';
-    renderNewTaskSubtaskChips();
+    $('qaSubtasks').value = '';
+    $('qaDue').value = '';
+    $('qaPriority').value = 'normal';
+    $('qaRecurrence').value = 'none';
+    if (!taskMatches(created.task, created.category)) { ui.search = ''; ui.status = 'all'; ui.category = 'all'; $('searchInput').value = ''; }
+    if (state.settings.collapsed.indexOf(created.category) !== -1) {
+        state.settings.collapsed = state.settings.collapsed.filter(function (c) { return c !== created.category; });
+        saveState();
+    }
+    ui.celebrate = created.task.id;
+    renderAll();
+    AudioSystem.sfx('add');
+    const pid = getTaskPokemonId(created.task);
+    const cat = CATEGORIES[created.category];
+    showToast(pid ? '¡Apareció un {pkmn} salvaje en ' + cat.name + '!' : 'Nueva misión en ' + cat.name + ': encontraste un objeto.', {
+        pokemonId: pid, image: pid ? getStaticSpriteUrl(pid, created.task.evolutionData.isShiny) : (created.task.currentItem || {}).sprite, imageClass: 'toast-sprite'
+    });
     input.focus();
 }
 
-function removeNewTaskSubtaskChip(id) {
-    newTaskModalSubtasks = newTaskModalSubtasks.filter(function (s) { return s.id !== id; });
-    renderNewTaskSubtaskChips();
-}
-
-function renderNewTaskSubtaskChips() {
-    const container = document.getElementById('newTaskSubtaskChips');
-
-    if (newTaskModalSubtasks.length === 0) {
-        container.innerHTML = '<span class="no-subtasks">Sin sub-tareas aún</span>';
-        return;
+// ========== ACCIONES SOBRE TAREAS ==========
+function handleEffects(effects, opts) {
+    if (!effects) return;
+    opts = opts || {};
+    if (effects.completed) ui.celebrate = effects.task.id;
+    renderAll();
+    if (effects.evolved && effects.evolved.forward && !effects.completed) {
+        showToast('¡' + pokemonLabel(effects.evolved.from) + ' evolucionó a {pkmn}!', { pokemonId: effects.evolved.to, image: getStaticSpriteUrl(effects.evolved.to, effects.task.evolutionData.isShiny), imageClass: 'toast-sprite', kind: 'evo' });
+        AudioSystem.play(effects.evolved.to, 0.5);
     }
-
-    container.innerHTML = newTaskModalSubtasks.map(function (subtask) {
-        return '<div class="subtask-chip" data-id="' + subtask.id + '">' +
-            '<span>' + escapeHTML(subtask.title) + '</span>' +
-            '<button class="chip-delete" onclick="removeNewTaskSubtaskChip(\'' + subtask.id + '\')">×</button>' +
-            '</div>';
-    }).join('');
-}
-
-// Categorías Colapsables
-function initCollapsedCategories() {
-    collapsedCategories.forEach(function (category) {
-        const element = document.getElementById(category + 'Tasks');
-        if (element) element.classList.add('collapsed');
+    if (effects.completed) {
+        const c = effects.captured;
+        let msg = '¡Misión cumplida! +' + effects.xp + ' XP';
+        if (c) msg += c.isNew ? ' · {pkmn} registrado en la Pokédex' : ' · {pkmn} capturado otra vez';
+        showToast(msg, { kind: 'success', pokemonId: c ? c.pokemonId : null, image: c ? getStaticSpriteUrl(c.pokemonId, effects.task.evolutionData.isShiny) : null, imageClass: 'toast-sprite' });
+        if (c) AudioSystem.play(c.pokemonId, 0.5); else AudioSystem.sfx('complete');
+    } else if (!effects.evolved && effects.xp > 0 && !opts.silent) {
+        AudioSystem.sfx('complete');
+    }
+    if (effects.shiny) showToast('✨ ¡Increíble! {pkmn} resultó ser variocolor (+' + XP_SHINY_BONUS + ' XP)', { kind: 'shiny', pokemonId: effects.shiny, image: getStaticSpriteUrl(effects.shiny, true), imageClass: 'toast-sprite' });
+    if (effects.spawned) showToast('🔁 Próxima repetición: ' + formatDate(effects.spawned.due), {});
+    if (effects.levelUp) {
+        showToast('⬆️ ¡Subiste a nivel ' + effects.levelAfter + '!', { kind: 'level' });
+        AudioSystem.sfx('levelUp');
+    }
+    effects.badges.forEach(function (b) {
+        showToast('🏅 Medalla obtenida: ' + b.name, { kind: 'badge', image: getBadgeSpriteUrl(b.sprite), imageClass: 'toast-badge' });
+        AudioSystem.sfx('badge');
     });
 }
 
-function toggleCategoryCollapse(category) {
-    const element = document.getElementById(category + 'Tasks');
-    if (!element) return;
-
-    element.classList.toggle('collapsed');
-
-    // Guardar estado
-    if (element.classList.contains('collapsed')) {
-        if (!collapsedCategories.includes(category)) {
-            collapsedCategories.push(category);
-        }
-    } else {
-        collapsedCategories = collapsedCategories.filter(function (c) { return c !== category; });
-    }
-    localStorage.setItem('todopkmn_collapsed', JSON.stringify(collapsedCategories));
-
-    // Update footer position after toggle
-    setTimeout(updateFooterPosition, 100);
-}
-
-// Footer Pokemon Habitat
-// Dynamic footer positioning - keeps footer close to content
-function updateFooterPosition() {
-    const appContainer = document.querySelector('.app-container');
-    const footer = document.getElementById('pokemonHabitat');
-    if (!appContainer || !footer) return;
-
-    const containerBottom = appContainer.getBoundingClientRect().bottom;
-    const footerTop = footer.getBoundingClientRect().top;
-    const gap = footerTop - containerBottom;
-
-    // If there's too much gap, reduce it
-    if (gap > 20) {
-        footer.style.marginTop = '0px';
-    } else {
-        footer.style.marginTop = '10px';
-    }
-}
-
-function renderPokemonHabitat() {
-    const container = document.getElementById('pokemonTeam');
-    if (!container) return;
-
-    // Update footer position after rendering
-    setTimeout(updateFooterPosition, 100);
-
-    // Recolectar todos los Pokémon de todas las tareas (AHORA INCLUYENDO TAREAS SIN SUBTAREAS)
-    const allPokemon = [];
-    Object.keys(tasks).forEach(function (category) {
-        tasks[category].forEach(function (task) {
-            // REPARACIÓN DE DATOS: Verificar y regenerar evolutionData si está corrupto o falta
-            if (!task.evolutionData || !task.evolutionData.chain || task.evolutionData.chain.length === 0) {
-                console.warn('Reparando datos de tarea:', task.title);
-                const subtaskCount = task.subtasks ? task.subtasks.length : 0;
-                task.evolutionData = getEvolutionChain(category, subtaskCount);
-
-                // Asegurar que tenga un Pokémon actual si no es item
-                if (!task.evolutionData.isItem && !task.currentPokemonId) {
-                    task.currentPokemonId = task.evolutionData.chain[0];
-                }
-
-                // Guardar los cambios reparados
-                saveData();
-            }
-
-            // All tasks with Pokémon appear (not just those with subtasks)
-            // Si es item, saltar (los items no van al habitat)
-            if (task.evolutionData.isItem) {
-                return;
-            }
-
-            // Usar currentPokemonId o calcularlo si falta (double check)
-            const pokemonId = task.currentPokemonId || (task.evolutionData.chain && task.evolutionData.chain.length > 0 ? task.evolutionData.chain[0] : null);
-
-            if (pokemonId) {
-                const isShiny = task.evolutionData.isShiny || false;
-                allPokemon.push({
-                    id: task.id,
-                    category: category,
-                    pokemonId: pokemonId,
-                    pokemonName: task.pokemonName, // Pass stored name
-                    isShiny: isShiny,
-                    title: task.title,
-                    createdAt: task.createdAt,
-                    completed: task.completed,
-                    progress: task.progress || 0,
-                    total: task.subtasks ? task.subtasks.length : 0
-                });
-            }
-        });
+// Marca/desmarca una tarea. Con subtareas: marcar completa todas; desmarcar las reinicia.
+function setTaskDone(taskId, done) {
+    const found = findTask(taskId);
+    if (!found) return;
+    const task = found.task;
+    if (task.subtasks.length === 0) { handleEffects(toggleTaskDone(taskId)); return; }
+    const effects = updateTask(taskId, {
+        title: task.title, description: task.description, category: found.category, priority: task.priority, due: task.due,
+        recurrence: task.recurrence, subtasks: task.subtasks.map(function (s) { return { id: s.id, title: s.title, completed: done }; })
     });
+    handleEffects(effects);
+}
 
-    if (allPokemon.length === 0) {
-        container.innerHTML = '';
-        return;
+function deleteWithUndo(taskId) {
+    const found = findTask(taskId);
+    if (!found) return;
+    // Mover el foco a la tarjeta vecina antes de borrar
+    const card = document.querySelector('.task-card[data-task-id="' + CSS.escape(taskId) + '"]');
+    const neighbor = card && (card.nextElementSibling || card.previousElementSibling);
+    const snap = deleteTask(taskId);
+    ui.undo = snap;
+    renderAll();
+    if (!(neighbor && focusByKey('open-' + neighbor.dataset.taskId))) focusByKey('cat-' + snap.category) || $('qaTitle').focus();
+    AudioSystem.sfx('delete');
+    showToast('Misión «' + snap.task.title + '» eliminada', { action: { label: 'Deshacer', run: undoDelete } });
+}
+
+function undoDelete() {
+    if (!ui.undo) return;
+    const snap = ui.undo;
+    ui.undo = null;
+    restoreTask(snap);
+    if (state.settings.collapsed.indexOf(snap.category) !== -1) {
+        state.settings.collapsed = state.settings.collapsed.filter(function (c) { return c !== snap.category; });
+        saveState();
     }
+    renderAll();
+    focusByKey('open-' + snap.task.id);
+    showToast('Misión «' + snap.task.title + '» restaurada', { quiet: true, duration: 2500 });
+}
 
-    // Clear container logic is handled differently now that we use JS objects
-    // We need to keep track of existing pokemon to avoid resetting them if possible,
-    // or just clear and recreate for simplicity (simplicity chosen for now).
-    container.innerHTML = '';
-    habitatPokemons = []; // Clear array of active instances
+function moveByKeyboard(taskId, dir) {
+    if (!canReorder()) { showToast('Para reordenar usa el orden «Manual» y quita la búsqueda y los filtros de estado.', { quiet: true }); return; }
+    const found = findTask(taskId);
+    if (!found) return;
+    const list = state.tasks[found.category];
+    const i = found.index;
+    if ((dir < 0 && i === 0) || (dir > 0 && i === list.length - 1)) return;
+    const beforeId = dir < 0 ? list[i - 1].id : (list[i + 2] ? list[i + 2].id : null);
+    moveTask(taskId, beforeId);
+    const active = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.focus : null;
+    renderTasks();
+    renderHabitat();
+    focusByKey(active || 'drag-' + taskId);
+    announce('Posición ' + (findTask(taskId).index + 1) + ' de ' + list.length);
+}
 
-    allPokemon.forEach(function (pkmn, index) {
-        const spriteUrl = pkmn.isShiny ? getShinySpriteUrl(pkmn.pokemonId) : getPokemonSpriteUrl(pkmn.pokemonId);
-        const shinyClass = pkmn.isShiny ? ' shiny' : '';
-        const date = new Date(pkmn.createdAt).toLocaleDateString('es-CL');
-        let statusText = pkmn.completed ? 'Completado' : (pkmn.total > 0 ? pkmn.progress + '/' + pkmn.total : 'En progreso');
-        const statusClass = pkmn.completed ? ' completed' : '';
-
-        // Random start position
-        // Debug: Log position to ensure it's random
-        const startLeft = Math.floor(Math.random() * 85); // 0-85% to ensure they don't spawn partly off-screen
-        console.log('Spawning Pokemon (v1.2):', pkmn.pokemonName || pkmn.pokemonId, 'at', startLeft + '%');
-
-        let displayName = pkmn.pokemonName;
-        if (!displayName) {
-            fetchPokemonName(pkmn.id, pkmn.category, pkmn.pokemonId);
-            displayName = 'Cargando...';
+// Arrastrar con puntero (ratón, táctil o lápiz) desde el asa ⋮⋮
+function startDrag(e, handle) {
+    const card = handle.closest('.task-card');
+    const list = card && card.parentElement;
+    if (!card || !list) return;
+    e.preventDefault();
+    card.classList.add('dragging');
+    list.classList.add('is-sorting');
+    const startY = e.clientY;
+    const pointerId = e.pointerId;
+    let moved = false;
+    // Los listeners van en document: mover la tarjeta en el DOM rompería la captura del puntero
+    function onMove(ev) {
+        if (ev.pointerId !== pointerId) return;
+        if (Math.abs(ev.clientY - startY) > 4) moved = true;
+        if (!moved) return;
+        ev.preventDefault();
+        const siblings = Array.prototype.filter.call(list.children, function (c) { return c !== card; });
+        let before = null;
+        for (let i = 0; i < siblings.length; i++) {
+            const r = siblings[i].getBoundingClientRect();
+            if (ev.clientY < r.top + r.height / 2) { before = siblings[i]; break; }
         }
+        if (before) { if (card.nextElementSibling !== before) list.insertBefore(card, before); }
+        else if (list.lastElementChild !== card) list.appendChild(card);
+    }
+    function onUp(ev) {
+        if (ev.pointerId !== pointerId) return;
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointercancel', onUp);
+        card.classList.remove('dragging');
+        list.classList.remove('is-sorting');
+        if (!moved) return;
+        const next = card.nextElementSibling;
+        moveTask(card.dataset.taskId, next ? next.dataset.taskId : null);
+        renderTasks();
+        renderHabitat();
+        focusByKey('drag-' + card.dataset.taskId);
+        announce('Misión movida');
+    }
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+}
 
-        // Create DOM Element
-        const el = document.createElement('div');
-        el.className = 'habitat-pokemon' + shinyClass;
-        el.dataset.taskId = pkmn.id;
-        el.dataset.category = pkmn.category;
-        el.style.left = startLeft + '%';
-
-        el.innerHTML =
-            '<img src="' + spriteUrl + '" alt="Pokemon">' +
-            '<div class="pokemon-tooltip">' +
-            '<div class="tooltip-header">' +
-            '<div class="tooltip-name">' + displayName + '</div>' +
-            '<div class="tooltip-id">#' + pkmn.pokemonId + '</div>' +
-            '</div>' +
-            '<div class="tooltip-task">📝 ' + escapeHTML(pkmn.title.substring(0, 25)) + (pkmn.title.length > 25 ? '...' : '') + '</div>' +
-            '<div class="tooltip-date">📅 ' + date + '</div>' +
-            '<div class="tooltip-status' + statusClass + '">' + statusText + '</div>' +
-            '</div>';
-
-        container.appendChild(el);
-
-        // Click event
-        el.addEventListener('click', function () {
-            scrollToTask(el.dataset.category, el.dataset.taskId);
-        });
-
-        // Add to simulation (except if sleeping)
-        if (!isSleeping) {
-            // Create Simulation Instance
-            const sim = new HabitatPokemon(el, startLeft);
-            habitatPokemons.push(sim);
-        } else {
-            el.classList.add('sleeping');
-            // Sleeping position fixed
-            el.style.left = (Math.floor(Math.random() * 80) + 10) + '%';
+function onCategoryListClick(e) {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const card = el.closest('.task-card');
+    const taskId = card ? card.dataset.taskId : null;
+    switch (el.dataset.action) {
+        case 'collapse': {
+            const c = el.dataset.cat;
+            const set = state.settings.collapsed;
+            const i = set.indexOf(c);
+            if (i === -1) set.push(c); else set.splice(i, 1);
+            saveState();
+            renderTasks();
+            break;
         }
+        case 'open': openTask(taskId); break;
+        case 'delete': deleteWithUndo(taskId); break;
+    }
+}
+
+function onCategoryListChange(e) {
+    const el = e.target;
+    const card = el.closest('.task-card');
+    if (!card) return;
+    if (el.dataset.action === 'toggle-sub') handleEffects(toggleSubtaskDone(card.dataset.taskId, el.dataset.sub));
+    else if (el.dataset.action === 'toggle-task') setTaskDone(card.dataset.taskId, el.checked);
+}
+
+// ========== DIÁLOGO DE DETALLES ==========
+function fillSelect(sel, items, value) {
+    sel.innerHTML = items.map(function (it) { return '<option value="' + it.value + '">' + escapeHTML(it.label) + '</option>'; }).join('');
+    if (value !== undefined) sel.value = value;
+}
+const categoryOptions = function () { return ALL_CATEGORY_IDS.map(function (c) { return { value: c, label: CATEGORIES[c].emoji + ' ' + CATEGORIES[c].name }; }); };
+const priorityOptions = function () { return ['high', 'normal', 'low'].map(function (p) { return { value: p, label: PRIORITIES[p].icon + ' ' + PRIORITIES[p].label }; }); };
+const recurrenceOptions = function () { return Object.keys(RECURRENCES).map(function (r) { return { value: r, label: RECURRENCES[r].label }; }); };
+
+function openTask(taskId) {
+    const found = findTask(taskId);
+    if (!found) return;
+    const task = found.task;
+    ui.editingId = taskId;
+    ui.returnFocus = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.focus : null;
+    ui.editSubs = task.subtasks.map(function (s) { return { id: s.id, title: s.title, completed: s.completed }; });
+    $('tdTitle').value = task.title;
+    $('tdDescription').value = task.description;
+    $('tdCategory').value = found.category;
+    $('tdPriority').value = task.priority;
+    $('tdDue').value = task.due || '';
+    $('tdRecurrence').value = task.recurrence;
+    $('tdCompleted').checked = task.completed;
+    $('tdNewSubtask').value = '';
+    renderEvoLine(task);
+    renderSubtaskEditor();
+    $('taskDialog').showModal();
+    $('tdTitle').focus();
+}
+
+function renderEvoLine(task) {
+    const evo = task.evolutionData;
+    const stage = evo.isItem ? evo.chain.findIndex(function (it) { return task.currentItem && it.id === task.currentItem.id; }) : evo.chain.indexOf(task.currentPokemonId);
+    $('evoLine').innerHTML = '<span class="evo-label">' + (evo.isItem ? 'Objetos de la aventura' : (evo.chain.length > 1 ? 'Línea evolutiva' : 'Pokémon')) + '</span><ol class="evo-steps">' +
+        evo.chain.map(function (step, i) {
+            const current = i === stage;
+            if (evo.isItem) {
+                return '<li class="evo-step' + (current ? ' is-current' : '') + '"' + (current ? ' aria-current="step"' : '') + '><img src="' + escapeHTML(step.sprite) +
+                    '" alt="" width="30" height="30" class="item-sprite"><span>' + escapeHTML(step.name) + '</span></li>';
+            }
+            return '<li class="evo-step' + (current ? ' is-current' : '') + (i < stage ? ' is-past' : '') + '"' + (current ? ' aria-current="step"' : '') + '>' +
+                pokemonImgHTML(step, evo.isShiny, 'evo-sprite', '') + '<span>' + nameSpan(step) + '</span></li>';
+        }).join('') + '</ol>' +
+        (evo.chain.length > 1 && !evo.isItem ? '<p class="hint">Evoluciona al completar el 50% y el 100% de las subtareas.</p>' : '');
+}
+
+function renderSubtaskEditor() {
+    const ul = $('tdSubtasks');
+    withFocus(function () {
+        ul.innerHTML = ui.editSubs.map(function (s, i) {
+            return '<li class="subtask-edit"><input type="checkbox" data-i="' + i + '" data-focus="es-check-' + i + '" aria-label="Subtarea ' + (i + 1) + ' completada"' +
+                (s.completed ? ' checked' : '') + '><input type="text" class="input" data-i="' + i + '" data-focus="es-title-' + i + '" maxlength="80" aria-label="Texto de la subtarea ' +
+                (i + 1) + '" value="' + escapeHTML(s.title) + '"><button type="button" class="icon-btn" data-remove="' + i + '" data-focus="es-del-' + i +
+                '" aria-label="Quitar subtarea ' + (i + 1) + '">✕</button></li>';
+        }).join('') || '<li class="hint">Sin subtareas: la misión se completa con la casilla. Con subtareas, el Pokémon evoluciona.</li>';
     });
-
-    // Start/Restart Loop if not already running
-    if (!isSimulationRunning && !isSleeping) {
-        isSimulationRunning = true;
-        animateHabitat();
-    }
+    $('tdCompletedRow').hidden = ui.editSubs.length > 0;
 }
 
-// --- Artificial Life System ---
-
-let habitatPokemons = [];
-let isSimulationRunning = false;
-
-class HabitatPokemon {
-    constructor(element, startX) {
-        this.element = element;
-        this.img = element.querySelector('img');
-        this.x = startX; // Percentage 0-100
-
-        // Add Depth (Y-axis)
-        // Expanded range for 350px height: 20px to 300px
-        this.y = Math.floor(Math.random() * 280) + 20;
-        this.element.style.bottom = this.y + 'px';
-        // Z-Index based on depth (closer = lower Y = higher Z? No, usually closer = down = higher Z in 2.5D)
-        // Higher Y (further back) -> Lower Z
-        // Lower Y (closer front) = Higher Z
-        // Max Y is ~300. Max Z can be 1000. 
-        this.element.style.zIndex = 1000 - this.y;
-
-        this.speed = (Math.random() * 0.03) + 0.01; // Random speed
-        this.direction = Math.random() > 0.5 ? 1 : -1; // 1 = right, -1 = left
-        this.state = 'idle'; // 'walking', 'idle'
-        this.timer = Math.floor(Math.random() * 100); // Frames until next state change
-
-        // Initial look direction
-        this.updateSpriteFlip();
-    }
-
-    update() {
-        if (this.timer > 0) {
-            this.timer--;
-        } else {
-            // Pick new state
-            this.changeState();
-        }
-
-        if (this.state === 'walking') {
-            this.x += this.speed * this.direction;
-
-            // Boundaries
-            if (this.x > 95) {
-                this.x = 95;
-                this.direction = -1;
-                this.timer = 60; // Walk back for at least 1s
-                this.updateSpriteFlip();
-            } else if (this.x < 0) {
-                this.x = 0;
-                this.direction = 1;
-                this.timer = 60;
-                this.updateSpriteFlip();
-            }
-        }
-
-        // Render position
-        this.element.style.left = this.x + '%';
-    }
-
-    changeState() {
-        const rand = Math.random();
-        if (rand < 0.3) {
-            this.state = 'idle';
-            this.timer = 60 + Math.random() * 120; // Idling 1-3 seconds
-        } else {
-            this.state = 'walking';
-            // Maybe change direction?
-            if (Math.random() > 0.5) {
-                this.direction *= -1;
-                this.updateSpriteFlip();
-            }
-            this.timer = 120 + Math.random() * 200; // Walk for 2-5 seconds
-            this.speed = (Math.random() * 0.03) + 0.01; // Change speed
-        }
-    }
-
-    updateSpriteFlip() {
-        // FLIP IMAGE ONLY, NOT CONTAINER
-        // scaleX(1) usually faces left for some sprites, -1 right. 
-        // Standard Gen 5 sprites usually face Left.
-        // So: Left (-1 dir) = scaleX(1). Right (1 dir) = scaleX(-1)
-        // Wait, standard sprites face Left? Let's assume standard is Left.
-        // If moving Right (1), flip (-1).
-        // If moving Left (-1), normal (1).
-        if (this.direction === 1) {
-            this.img.style.transform = 'scaleX(-1)';
-        } else {
-            this.img.style.transform = 'scaleX(1)';
-        }
-    }
+function addEditSubtask() {
+    const input = $('tdNewSubtask');
+    const title = input.value.trim();
+    if (!title) { input.focus(); return; }
+    ui.editSubs.push({ id: null, title: title.slice(0, 80), completed: false });
+    input.value = '';
+    renderSubtaskEditor();
+    input.focus();
 }
 
-function animateHabitat() {
-    if (!isSimulationRunning) return;
-
-    habitatPokemons.forEach(pkmn => pkmn.update());
-
-    requestAnimationFrame(animateHabitat);
+function saveTaskDialog() {
+    const id = ui.editingId;
+    if (!id || !findTask(id)) return;
+    let due = $('tdDue').value || null;
+    const recurrence = $('tdRecurrence').value;
+    if (recurrence !== 'none' && !due) due = todayStr();
+    const effects = updateTask(id, {
+        title: $('tdTitle').value,
+        description: $('tdDescription').value,
+        category: $('tdCategory').value,
+        priority: $('tdPriority').value,
+        due: due,
+        recurrence: recurrence,
+        subtasks: ui.editSubs,
+        completed: $('tdCompleted').checked
+    });
+    handleEffects(effects, { silent: true });
+    showToast('Cambios guardados', { quiet: true, duration: 2500 });
 }
 
-
-// Cache to prevent multiple fetches for the same ID while in flight
-const pendingFetches = new Set();
-
-function fetchPokemonName(taskId, category, pokemonId) {
-    const fetchKey = taskId + '_' + pokemonId;
-    if (pendingFetches.has(fetchKey)) return;
-
-    pendingFetches.add(fetchKey);
-
-    fetch('https://pokeapi.co/api/v2/pokemon/' + pokemonId)
-        .then(response => response.json())
-        .then(data => {
-            // Capitalize name
-            const name = data.name.charAt(0).toUpperCase() + data.name.slice(1);
-
-            // Find task and update
-            const task = tasks[category].find(t => t.id === taskId);
-            if (task) {
-                task.pokemonName = name;
-                task.pokemonNameId = pokemonId; // Store ID to invalidate if pokemon changes
-                saveData();
-                renderPokemonHabitat(); // Re-render to show name
-            }
-        })
-        .catch(err => {
-            console.error('Error fetching pokemon name:', err);
-        })
-        .finally(() => {
-            pendingFetches.delete(fetchKey);
-        });
+// ========== POKÉDEX ==========
+function dexEntries() {
+    const map = {};
+    Object.keys(state.dex).forEach(function (id) {
+        const e = state.dex[id];
+        map[id] = { id: Number(id), caught: true, shiny: e.shiny, count: e.count, first: e.first, progress: false };
+    });
+    allTasks().forEach(function (x) {
+        if (x.task.completed) return;
+        const pid = getTaskPokemonId(x.task);
+        if (!pid) return;
+        if (map[pid]) map[pid].progress = true;
+        else map[pid] = { id: pid, caught: false, shiny: !!x.task.evolutionData.isShiny, count: 0, progress: true };
+    });
+    return Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return a.id - b.id; });
 }
 
-function scrollToTask(category, taskId) {
-    // Buscar la tarea en el DOM
-    const taskElement = document.querySelector('.task-item[data-task-id="' + taskId + '"]');
-    if (taskElement) {
-        // Asegurar que la categoría esté expandida
-        const categoryElement = document.getElementById(category + 'Tasks');
-        if (categoryElement && categoryElement.classList.contains('collapsed')) {
-            categoryElement.classList.remove('collapsed');
-            collapsedCategories = collapsedCategories.filter(function (c) { return c !== category; });
-            localStorage.setItem('todopkmn_collapsed', JSON.stringify(collapsedCategories));
-        }
-
-        // Scroll hacia la tarea
-        taskElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // Resaltar la tarea
-        taskElement.style.boxShadow = '0 0 20px rgba(255, 204, 0, 0.8)';
-        setTimeout(function () {
-            taskElement.style.boxShadow = '';
-        }, 2000);
-    }
-}
-
-// ========== POKÉDEX DASHBOARD ==========
-
-// Toggle Pokédex panel
-function togglePokedex() {
-    const dashboard = document.getElementById('pokedexDashboard');
-    dashboard.classList.toggle('collapsed');
-}
-
-// Render Pokédex entries
 function renderPokedex() {
-    const grid = document.getElementById('pokedexGrid');
-    const empty = document.getElementById('pokedexEmpty');
-    const countEl = document.getElementById('pokedexCount');
-    
-    if (!grid || !empty || !countEl) return;
-
-    // Collect all Pokémon from all tasks
-    const pokedexEntries = [];
-    
-    Object.keys(tasks).forEach(function (category) {
-        tasks[category].forEach(function (task) {
-            // Skip items - only show Pokémon
-            if (task.evolutionData && task.evolutionData.isItem) {
-                return;
-            }
-            
-            const pokemonId = task.currentPokemonId || 
-                (task.evolutionData && task.evolutionData.chain ? task.evolutionData.chain[0] : null);
-            
-            if (pokemonId) {
-                const isCompleted = task.completed || 
-                    (task.subtasks && task.subtasks.length > 0 && 
-                     task.subtasks.every(s => s.completed));
-                
-                pokedexEntries.push({
-                    id: task.id,
-                    category: category,
-                    pokemonId: pokemonId,
-                    pokemonName: task.pokemonName || 'Cargando...',
-                    isShiny: task.evolutionData ? task.evolutionData.isShiny : false,
-                    createdAt: task.createdAt,
-                    completed: isCompleted,
-                    taskTitle: task.title
-                });
-            }
-        });
+    const caught = dexCount();
+    const shinies = Object.keys(state.dex).filter(function (id) { return state.dex[id].shiny; }).length;
+    const pct = Math.round((caught / DEX_TOTAL) * 1000) / 10;
+    $('dexProgress').innerHTML = '<div class="dex-total"><span class="dex-big">' + caught + '<small>/' + DEX_TOTAL + '</small></span><span>Pokémon registrados · ' +
+        String(pct).replace('.', ',') + '% · ' + shinies + ' variocolor</span></div>' +
+        '<div class="progress big" role="progressbar" aria-label="Pokédex completada" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '"><span style="width:' + pct + '%"></span></div>' +
+        '<ul class="gen-list">' + GENERATIONS.map(function (g) {
+            const n = Object.keys(state.dex).filter(function (id) { return id >= g.from && id <= g.to; }).length;
+            const size = g.to - g.from + 1;
+            return '<li><span class="gen-name">' + g.name + '</span><span class="gen-bar"><span style="width:' + (n / size * 100) + '%"></span></span><span class="gen-n">' + n + '/' + size + '</span></li>';
+        }).join('') + '</ul>';
+    withFocus(function () {
+        $('dexFilters').innerHTML = DEX_FILTERS.map(function (f) {
+            return '<button type="button" class="chip' + (ui.dexFilter === f.id ? ' is-active' : '') + '" aria-pressed="' + (ui.dexFilter === f.id) + '" data-dex="' + f.id + '" data-focus="dex-' + f.id + '">' + f.label + '</button>';
+        }).join('');
     });
+    const q = normalizeText(ui.dexSearch.replace(/^#/, ''));
+    const entries = dexEntries().filter(function (e) {
+        if (ui.dexFilter === 'caught' && !e.caught) return false;
+        if (ui.dexFilter === 'progress' && !(e.progress && !e.caught)) return false;
+        if (ui.dexFilter === 'shiny' && !e.shiny) return false;
+        if (q && normalizeText(pokemonLabel(e.id)).indexOf(q) === -1 && String(e.id).indexOf(q.replace(/^0+/, '')) !== 0) return false;
+        return true;
+    });
+    $('dexGrid').innerHTML = entries.map(function (e) {
+        const status = e.caught ? 'Capturado' + (e.count > 1 ? ' ×' + e.count : '') : 'En progreso';
+        return '<li class="dex-card' + (e.caught ? ' is-caught' : ' is-progress') + (e.shiny ? ' is-shiny' : '') + '">' +
+            '<span class="dex-no">#' + String(e.id).padStart(3, '0') + '</span>' +
+            pokemonImgHTML(e.id, e.shiny, 'dex-sprite', '') +
+            '<span class="dex-name">' + (e.shiny ? '<span class="shiny-star" aria-label="Variocolor">✨</span> ' : '') + nameSpan(e.id) + '</span>' +
+            '<span class="dex-status">' + status + '</span></li>';
+    }).join('');
+    $('dexGrid').querySelectorAll('img').forEach(function (img) { img.loading = 'lazy'; });
+    $('dexEmpty').hidden = entries.length > 0;
+    $('dexEmpty').textContent = dexEntries().length ? 'Ningún Pokémon coincide con el filtro.' : 'Completa tareas para registrar Pokémon en tu Pokédex.';
+}
 
-    // Update count
-    countEl.textContent = pokedexEntries.length;
+// ========== ENTRENADOR ==========
+function renderTrainer() {
+    const info = levelInfo();
+    const streak = getStreak();
+    const tasksDone = completedTaskEvents().length;
+    const badgesN = Object.keys(state.badges).length;
+    const tr = state.trainer;
+    const partnerOptions = Object.keys(state.dex).map(Number);
+    if (partnerOptions.indexOf(tr.partnerId) === -1) partnerOptions.unshift(tr.partnerId);
+    const started = new Date(tr.startedAt);
+    const html = '<article class="trainer-card">' +
+        '<header class="tc-head"><span class="tc-title">TARJETA DE ENTRENADOR</span><span class="tc-id">ID No. ' + escapeHTML(tr.trainerId) + '</span></header>' +
+        '<div class="tc-body">' +
+        '<div class="tc-partner"><div class="tc-partner-frame">' + pokemonImgHTML(tr.partnerId, !!(state.dex[tr.partnerId] && state.dex[tr.partnerId].shiny), 'partner-sprite', '') + '</div>' +
+        '<label class="field"><span>Compañero</span><select id="partnerSelect" class="input" data-focus="partner">' + partnerOptions.map(function (id) {
+            return '<option value="' + id + '"' + (id === tr.partnerId ? ' selected' : '') + '>#' + String(id).padStart(3, '0') + ' ' + escapeHTML(pokemonLabel(id)) + '</option>';
+        }).join('') + '</select></label>' +
+        '<button type="button" class="btn btn-ghost btn-small" id="randomPartner" data-focus="partner-random">🎲 Compañero aleatorio</button></div>' +
+        '<div class="tc-info">' +
+        '<label class="field"><span>Nombre</span><input id="trainerName" class="input" type="text" maxlength="20" value="' + escapeHTML(tr.name) + '" data-focus="trainer-name"></label>' +
+        '<div class="tc-level"><span class="tc-level-n">Nv. ' + info.level + '</span><span class="tc-xp">' + info.xp + ' XP · faltan ' + info.toNext + ' para Nv. ' + (info.level + 1) + '</span></div>' +
+        '<div class="progress big" role="progressbar" aria-label="Experiencia hacia el siguiente nivel" aria-valuemin="0" aria-valuemax="' + info.span + '" aria-valuenow="' + info.into + '"><span style="width:' + (info.into / info.span * 100) + '%"></span></div>' +
+        '<dl class="tc-stats">' +
+        '<div><dt>Misiones</dt><dd>' + tasksDone + '</dd></div>' +
+        '<div><dt>Racha</dt><dd>' + streak.current + ' 🔥</dd></div>' +
+        '<div><dt>Mejor racha</dt><dd>' + streak.best + '</dd></div>' +
+        '<div><dt>Pokédex</dt><dd>' + dexCount() + '</dd></div>' +
+        '<div><dt>Medallas</dt><dd>' + badgesN + '/' + BADGES.length + '</dd></div>' +
+        '<div><dt>Aventura desde</dt><dd>' + (isNaN(started) ? '—' : started.getDate() + ' ' + MONTHS[started.getMonth()] + ' ' + started.getFullYear()) + '</dd></div>' +
+        '</dl>' + (streak.activeToday ? '' : '<p class="hint">Completa una tarea o subtarea hoy para ' + (streak.current ? 'mantener' : 'empezar') + ' tu racha.</p>') +
+        '</div></div></article>';
+    withFocus(function () { $('trainerCard').innerHTML = html; });
+    $('badgeCase').innerHTML = BADGES.map(function (b) {
+        const at = state.badges[b.id];
+        const d = at ? new Date(at) : null;
+        return '<li class="badge' + (at ? ' is-earned' : '') + '"><img src="' + getBadgeSpriteUrl(b.sprite) + '" alt="" width="60" height="60">' +
+            '<span class="badge-name">' + b.name + '</span><span class="badge-desc">' + b.desc + '</span>' +
+            '<span class="badge-state">' + (d ? 'Obtenida el ' + d.getDate() + ' ' + MONTHS[d.getMonth()] : 'Bloqueada') + '</span></li>';
+    }).join('');
+}
 
-    // Show empty state if no entries
-    if (pokedexEntries.length === 0) {
-        grid.innerHTML = '';
-        empty.style.display = 'block';
+// ========== ESTADÍSTICAS ==========
+function renderStats() {
+    const weeks = weeklyCompletions(8);
+    const byCat = completionsByCategory();
+    const maxW = Math.max(1, Math.max.apply(null, weeks.map(function (w) { return w.count; })));
+    const maxC = Math.max(1, Math.max.apply(null, ALL_CATEGORY_IDS.map(function (c) { return byCat[c]; })));
+    const info = levelInfo();
+    const streak = getStreak();
+    let pending = 0, overdue = 0;
+    allTasks().forEach(function (x) { if (!x.task.completed) pending++; if (dueStatus(x.task) === 'overdue') overdue++; });
+    const weekLabel = function (w) { const d = parseDateStr(w.start); return d.getDate() + ' ' + MONTHS[d.getMonth()]; };
+    const thisWeek = weeks[weeks.length - 1].count;
+    const subToday = state.history.filter(function (e) { return !e.migrated && e.type !== 'bonus' && isoToDateStr(e.at) === todayStr(); }).length;
+    $('statsContent').innerHTML =
+        '<div class="stat-tiles">' +
+        '<div class="tile static"><span class="tile-n">' + thisWeek + '</span><span class="tile-label">Esta semana</span></div>' +
+        '<div class="tile static"><span class="tile-n">' + completedTaskEvents().length + '</span><span class="tile-label">Misiones totales</span></div>' +
+        '<div class="tile static"><span class="tile-n">' + info.xp + '</span><span class="tile-label">XP total</span></div>' +
+        '<div class="tile static"><span class="tile-n">' + streak.current + '<small>/' + streak.best + '</small></span><span class="tile-label">Racha / mejor</span></div>' +
+        '<div class="tile static"><span class="tile-n">' + pending + '</span><span class="tile-label">Pendientes</span></div>' +
+        '<div class="tile static' + (overdue ? ' tile-alert' : '') + '"><span class="tile-n">' + overdue + '</span><span class="tile-label">Vencidas</span></div>' +
+        '<div class="tile static"><span class="tile-n">' + subToday + '</span><span class="tile-label">Acciones hoy</span></div>' +
+        '</div>' +
+        '<section class="panel chart-panel" aria-labelledby="chartWeeks"><h2 class="section-title" id="chartWeeks">Misiones completadas por semana</h2>' +
+        '<div class="bar-chart" aria-hidden="true">' + weeks.map(function (w) {
+            return '<div class="bar-col"><span class="bar-n">' + w.count + '</span><span class="bar" style="height:' + (w.count / maxW * 100) + '%"></span><span class="bar-label">' + weekLabel(w) + '</span></div>';
+        }).join('') + '</div>' +
+        '<table class="sr-only"><caption>Misiones completadas por semana (semana que empieza el lunes)</caption><tr><th scope="col">Semana</th><th scope="col">Misiones</th></tr>' +
+        weeks.map(function (w) { return '<tr><td>' + weekLabel(w) + '</td><td>' + w.count + '</td></tr>'; }).join('') + '</table></section>' +
+        '<section class="panel chart-panel" aria-labelledby="chartCats"><h2 class="section-title" id="chartCats">Por categoría (total)</h2><ul class="hbars">' +
+        ALL_CATEGORY_IDS.map(function (c) {
+            const cat = CATEGORIES[c];
+            return '<li style="--cat:' + cat.color + '"><span class="hbar-label">' + cat.emoji + ' ' + cat.name + '</span><span class="hbar"><span style="width:' + (byCat[c] / maxC * 100) +
+                '%"></span></span><span class="hbar-n">' + byCat[c] + '</span></li>';
+        }).join('') + '</ul></section>' +
+        (state.meta.migratedFrom === 'v5' ? '<p class="hint">Las tareas completadas en v5 se cuentan en la fecha en que se crearon (v5 no guardaba la fecha de completado).</p>' : '');
+}
+
+// ========== NAVEGACIÓN ==========
+function viewFromHash() {
+    const h = location.hash.replace('#', '');
+    const v = Object.keys(VIEWS).find(function (k) { return VIEWS[k] === h; });
+    return v || 'tasks';
+}
+
+function route(fromUser) {
+    ui.view = viewFromHash();
+    document.querySelectorAll('.view').forEach(function (s) { s.hidden = s.dataset.view !== ui.view; });
+    document.querySelectorAll('.tab').forEach(function (a) {
+        if (a.dataset.view === ui.view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    renderCurrentView();
+    if (fromUser) {
+        const h = document.querySelector('#view-' + ui.view + ' .view-title');
+        if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+        window.scrollTo(0, 0);
+    }
+}
+
+function renderCurrentView() {
+    if (ui.view === 'tasks') renderTasksView();
+    else if (ui.view === 'pokedex') renderPokedex();
+    else if (ui.view === 'trainer') renderTrainer();
+    else if (ui.view === 'stats') renderStats();
+}
+
+function renderAll() {
+    renderHeader();
+    renderCurrentView();
+}
+
+function goToView(v) {
+    const hash = '#' + VIEWS[v];
+    if (location.hash === hash) route(true); else location.hash = hash;
+}
+
+// ========== AJUSTES / RESPALDO ==========
+function openSettings() {
+    $('setAppName').value = state.settings.appName;
+    document.querySelectorAll('#setTheme input').forEach(function (r) { r.checked = r.value === state.settings.theme; });
+    $('setSound').checked = !!state.settings.sound;
+    $('setNotify').checked = !!state.settings.notify && notificationPermission() === 'granted';
+    updateNotifyStatus();
+    $('installBtn').hidden = !ui.installPrompt;
+    $('settingsDialog').showModal();
+}
+
+function exportBackup() {
+    const blob = new Blob([exportData()], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'todomon-respaldo-' + todayStr() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    showToast('Respaldo exportado (' + allTasks().length + ' tareas).', { kind: 'success' });
+}
+
+function importBackup(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+        if (!window.confirm('Importar reemplazará tus datos actuales. Se guardará una copia de seguridad en este navegador. ¿Continuar?')) return;
+        try {
+            importData(String(reader.result));
+            applyTheme();
+            applySound();
+            renderAll();
+            showToast('Respaldo importado: ' + allTasks().length + ' tareas.', { kind: 'success' });
+        } catch (err) {
+            console.warn('Importación fallida:', err);
+            showToast('No se pudo importar: ' + err.message, { kind: 'warn' });
+        }
+    };
+    reader.readAsText(file);
+}
+
+// ========== NOTIFICACIONES (opcionales, mientras la app está abierta) ==========
+function notificationPermission() { return 'Notification' in window ? Notification.permission : 'unsupported'; }
+
+function updateNotifyStatus() {
+    const p = notificationPermission();
+    $('notifyStatus').textContent = p === 'unsupported' ? 'Este navegador no admite notificaciones.' :
+        p === 'denied' ? 'Las notificaciones están bloqueadas en la configuración del navegador.' :
+            state.settings.notify && p === 'granted' ? 'Recibirás un resumen al día como máximo.' : '';
+}
+
+function onNotifyToggle(e) {
+    if (!e.target.checked) { state.settings.notify = false; saveState(); updateNotifyStatus(); return; }
+    if (notificationPermission() === 'unsupported') { e.target.checked = false; updateNotifyStatus(); return; }
+    Notification.requestPermission().then(function (p) {
+        state.settings.notify = p === 'granted';
+        e.target.checked = state.settings.notify;
+        saveState();
+        updateNotifyStatus();
+        if (state.settings.notify) { state.meta.lastNotifyDate = null; maybeNotify(); }
+    });
+}
+
+function maybeNotify() {
+    if (!state.settings.notify || notificationPermission() !== 'granted') return;
+    const today = todayStr();
+    if (state.meta.lastNotifyDate === today) return;
+    let dueToday = 0, overdue = 0;
+    allTasks().forEach(function (x) {
+        const st = dueStatus(x.task, today);
+        if (st === 'today') dueToday++;
+        if (st === 'overdue') overdue++;
+    });
+    state.meta.lastNotifyDate = today;
+    saveState();
+    if (!dueToday && !overdue) return;
+    const body = [dueToday ? dueToday + ' para hoy' : '', overdue ? overdue + ' vencida' + (overdue > 1 ? 's' : '') : ''].filter(Boolean).join(' · ');
+    const opts = { body: body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'todomon-daily' };
+    const title = (state.settings.appName || 'ToDoMon') + ': misiones pendientes';
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(function (reg) { return reg.showNotification(title, opts); }).catch(function () { });
+    } else {
+        try { new Notification(title, opts); } catch (err) { }
+    }
+}
+
+// ========== PWA ==========
+function registerServiceWorker() {
+    if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').catch(function (err) { console.warn('Service worker no registrado:', err); });
+    let notified = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!hadController || notified) return;
+        notified = true;
+        showToast('Hay una nueva versión de ToDoMon.', { action: { label: 'Recargar', run: function () { location.reload(); } }, duration: 15000 });
+    });
+}
+
+// ========== ATAJOS DE TECLADO ==========
+function isTypingTarget(el) {
+    if (!el) return false;
+    const tag = el.tagName;
+    return el.isContentEditable || tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && !['checkbox', 'radio', 'button'].includes(el.type));
+}
+
+function onKeydown(e) {
+    if (document.querySelector('dialog[open]')) return;
+    const target = e.target;
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && !isTypingTarget(target)) {
+        const card = target.closest && target.closest('.task-card');
+        if (card) { e.preventDefault(); moveByKeyboard(card.dataset.taskId, e.key === 'ArrowUp' ? -1 : 1); }
         return;
     }
+    if (target.classList && target.classList.contains('drag-handle') && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        e.preventDefault();
+        moveByKeyboard(target.closest('.task-card').dataset.taskId, e.key === 'ArrowUp' ? -1 : 1);
+        return;
+    }
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !isTypingTarget(target)) {
+        if (ui.undo) { e.preventDefault(); undoDelete(); }
+        return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(target)) return;
+    if (e.key === 'n' || e.key === 'N') { e.preventDefault(); if (ui.view !== 'tasks') goToView('tasks'); $('qaTitle').focus(); }
+    else if (e.key === '/') { e.preventDefault(); if (ui.view !== 'tasks') goToView('tasks'); $('searchInput').focus(); }
+    else if (e.key === '?') { e.preventDefault(); $('helpDialog').showModal(); }
+    else if (/^[1-4]$/.test(e.key)) { e.preventDefault(); goToView(VIEW_ORDER[Number(e.key) - 1]); }
+}
 
-    empty.style.display = 'none';
+// ========== EVENTOS ==========
+function bindEvents() {
+    $('quickAdd').addEventListener('submit', onQuickAdd);
+    $('qaMore').addEventListener('click', function () {
+        const extra = $('qaExtra');
+        extra.hidden = !extra.hidden;
+        this.setAttribute('aria-expanded', String(!extra.hidden));
+        this.textContent = extra.hidden ? 'Más' : 'Menos';
+    });
 
-    // Sort: completed first, then by date
-    pokedexEntries.sort(function (a, b) {
-        if (a.completed !== b.completed) {
-            return a.completed ? -1 : 1;
+    let searchTimer = null;
+    $('searchInput').addEventListener('input', function () {
+        const v = this.value.trim();
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () { ui.search = v; renderTasks(); }, 120);
+    });
+    $('summary').addEventListener('click', function (e) {
+        const b = e.target.closest('[data-status]');
+        if (!b) return;
+        ui.status = ui.status === b.dataset.status ? 'all' : b.dataset.status;
+        renderTasksView();
+    });
+    $('statusFilters').addEventListener('click', function (e) {
+        const b = e.target.closest('[data-status]');
+        if (b) { ui.status = b.dataset.status; renderTasksView(); }
+    });
+    $('categoryFilters').addEventListener('click', function (e) {
+        const b = e.target.closest('[data-cat]');
+        if (b) { ui.category = b.dataset.cat; renderTasksView(); }
+    });
+    $('sortSelect').addEventListener('change', function () { state.settings.sort = this.value; saveState(); renderTasks(); });
+
+    const list = $('categoryList');
+    list.addEventListener('click', onCategoryListClick);
+    list.addEventListener('change', onCategoryListChange);
+    list.addEventListener('pointerdown', function (e) {
+        const h = e.target.closest('.drag-handle');
+        if (h && e.button === 0) startDrag(e, h);
+    });
+    list.addEventListener('dblclick', function (e) {
+        const card = e.target.closest('.task-card');
+        if (card && !e.target.closest('input,button,label')) openTask(card.dataset.taskId);
+    });
+
+    // Diálogo de tarea
+    const dlg = $('taskDialog');
+    $('taskForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const action = e.submitter ? e.submitter.value : 'save';
+        if (action === 'save') saveTaskDialog();
+        dlg.close();
+    });
+    dlg.addEventListener('close', function () {
+        const id = ui.editingId;
+        ui.editingId = null;
+        if (!focusByKey(ui.returnFocus) && id) focusByKey('open-' + id);
+    });
+    $('tdAddSubtask').addEventListener('click', addEditSubtask);
+    $('tdNewSubtask').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addEditSubtask(); } });
+    $('tdSubtasks').addEventListener('input', function (e) {
+        const i = e.target.dataset.i;
+        if (i !== undefined && e.target.type === 'text') ui.editSubs[i].title = e.target.value;
+    });
+    $('tdSubtasks').addEventListener('change', function (e) {
+        const i = e.target.dataset.i;
+        if (i !== undefined && e.target.type === 'checkbox') ui.editSubs[i].completed = e.target.checked;
+    });
+    $('tdSubtasks').addEventListener('click', function (e) {
+        const b = e.target.closest('[data-remove]');
+        if (!b) return;
+        ui.editSubs.splice(Number(b.dataset.remove), 1);
+        renderSubtaskEditor();
+        if (!focusByKey('es-del-' + Math.min(Number(b.dataset.remove), ui.editSubs.length - 1))) $('tdNewSubtask').focus();
+    });
+    $('tdDelete').addEventListener('click', function () {
+        const id = ui.editingId;
+        ui.returnFocus = null;
+        dlg.close();
+        deleteWithUndo(id);
+    });
+
+    // Cabecera
+    $('themeBtn').addEventListener('click', cycleTheme);
+    $('soundBtn').addEventListener('click', function () {
+        state.settings.sound = !state.settings.sound;
+        saveState();
+        applySound();
+        announce(state.settings.sound ? 'Sonido activado' : 'Sonido desactivado');
+    });
+    $('settingsBtn').addEventListener('click', openSettings);
+    $('helpBtn').addEventListener('click', function () { $('helpDialog').showModal(); });
+    $('openHelpFromSettings').addEventListener('click', function () { $('settingsDialog').close(); $('helpDialog').showModal(); });
+    $('trainerChip').addEventListener('click', function () { goToView('trainer'); });
+
+    // Ajustes
+    $('setAppName').addEventListener('input', function () {
+        state.settings.appName = this.value.trim().slice(0, 30) || 'ToDoMon';
+        saveState();
+        renderHeader();
+    });
+    $('setTheme').addEventListener('change', function (e) { state.settings.theme = e.target.value; saveState(); applyTheme(); });
+    $('setSound').addEventListener('change', function () { state.settings.sound = this.checked; saveState(); applySound(); });
+    $('setNotify').addEventListener('change', onNotifyToggle);
+    $('exportBtn').addEventListener('click', exportBackup);
+    $('importInput').addEventListener('change', function () { importBackup(this.files[0]); this.value = ''; });
+    $('installBtn').addEventListener('click', function () {
+        if (!ui.installPrompt) return;
+        ui.installPrompt.prompt();
+        ui.installPrompt = null;
+        this.hidden = true;
+    });
+
+    // Pokédex
+    $('dexFilters').addEventListener('click', function (e) {
+        const b = e.target.closest('[data-dex]');
+        if (b) { ui.dexFilter = b.dataset.dex; renderPokedex(); }
+    });
+    $('dexSearch').addEventListener('input', function () { ui.dexSearch = this.value.trim(); renderPokedex(); });
+
+    // Entrenador (delegado: la tarjeta se re-renderiza)
+    $('trainerCard').addEventListener('change', function (e) {
+        if (e.target.id === 'partnerSelect') {
+            state.trainer.partnerId = Number(e.target.value);
+            saveState();
+            renderHeader();
+            renderTrainer();
+            AudioSystem.play(state.trainer.partnerId, 0.4);
+        } else if (e.target.id === 'trainerName') {
+            state.trainer.name = e.target.value.trim().slice(0, 20) || 'Entrenador';
+            saveState();
+            announce('Nombre guardado');
         }
-        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+    $('trainerCard').addEventListener('click', function (e) {
+        if (e.target.id !== 'randomPartner') return;
+        state.trainer.partnerId = 1 + Math.floor(Math.random() * DEX_TOTAL);
+        saveState();
+        renderHeader();
+        renderTrainer();
+        AudioSystem.play(state.trainer.partnerId, 0.4);
     });
 
-    // Render entries
-    grid.innerHTML = pokedexEntries.map(function (entry) {
-        const spriteUrl = entry.isShiny 
-            ? getShinySpriteUrl(entry.pokemonId) 
-            : getPokemonSpriteUrl(entry.pokemonId);
-        
-        const formattedDate = new Date(entry.createdAt).toLocaleDateString('es-CL');
-        
-        return '<div class="pokedex-entry ' + (entry.completed ? 'completed' : '') + '" ' +
-               'data-task-id="' + entry.id + '" ' +
-               'data-category="' + entry.category + '">' +
-            '<img src="' + spriteUrl + '" alt="#" class="pokedex-sprite">' +
-            '<div class="pokedex-info">' +
-                '<div class="pokedex-id">#' + String(entry.pokemonId).padStart(3, '0') + '</div>' +
-                '<div class="pokedex-name">' + 
-                    escapeHTML(entry.pokemonName) + 
-                    (entry.isShiny ? '<span class="pokedex-shiny">SHINY</span>' : '') +
-                '</div>' +
-                '<span class="pokedex-status ' + (entry.completed ? 'completed' : 'in-progress') + '">' +
-                    (entry.completed ? '✓ CAPTURADO' : '◐ EN PROGRESO') +
-                '</span>' +
-                '<div class="pokedex-date">📅 ' + formattedDate + '</div>' +
-            '</div>' +
-        '</div>';
-    }).join('');
+    $('brandPartner').addEventListener('click', function () { AudioSystem.play(state.trainer.partnerId, 0.4); });
+    window.addEventListener('hashchange', function () { route(true); });
+    document.addEventListener('keydown', onKeydown);
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); ui.installPrompt = e; });
 
-    // Add click handlers to scroll to task
-    grid.querySelectorAll('.pokedex-entry').forEach(function (el) {
-        el.addEventListener('click', function () {
-            scrollToTask(el.dataset.category, el.dataset.taskId);
-        });
+    // Nombres de Pokémon que llegan desde PokeAPI: actualizar solo el texto
+    onPokemonName(function (id) {
+        const name = pokemonLabel(id);
+        document.querySelectorAll('[data-name-id="' + id + '"]').forEach(function (el) { el.textContent = name; });
+        document.querySelectorAll('#partnerSelect option[value="' + id + '"]').forEach(function (o) { o.textContent = '#' + String(id).padStart(3, '0') + ' ' + name; });
+        if (state.dex[id] && !state.dex[id].name && pokemonNames[id]) { state.dex[id].name = pokemonNames[id]; saveState(); }
     });
+
+    habitatOnSelect = openTask;
 }
 
-// Fetch and update Pokémon names for Pokédex
-function updatePokedexNames() {
-    Object.keys(tasks).forEach(function (category) {
-        tasks[category].forEach(function (task) {
-            if (!task.evolutionData || task.evolutionData.isItem) return;
-            
-            const pokemonId = task.currentPokemonId || 
-                (task.evolutionData.chain ? task.evolutionData.chain[0] : null);
-            
-            if (pokemonId && !task.pokemonName) {
-                fetchPokemonName(task.id, category, pokemonId);
-            }
-        });
-    });
+// ========== INICIO ==========
+function init() {
+    const result = loadState();
+    ui.today = todayStr();
+    fillSelect($('qaCategory'), categoryOptions(), 'urgent');
+    fillSelect($('qaPriority'), priorityOptions(), 'normal');
+    fillSelect($('qaRecurrence'), recurrenceOptions(), 'none');
+    fillSelect($('tdCategory'), categoryOptions());
+    fillSelect($('tdPriority'), priorityOptions());
+    fillSelect($('tdRecurrence'), recurrenceOptions());
+    $('appVersion').textContent = APP_VERSION;
+    applyTheme();
+    applySound();
+    bindEvents();
+    route(false);
+    renderHeader();
+
+    if (result.migratedFrom === 'v5') {
+        showToast('¡Bienvenido a ToDoMon 6! Migramos tus ' + allTasks().length + ' tareas de v5 (con copia de seguridad).', { kind: 'success', duration: 8000 });
+    } else if (result.migratedFrom === 'corrupt') {
+        showToast('Tus datos guardados estaban dañados: se guardó una copia y empezamos de nuevo.', { kind: 'warn', duration: 10000 });
+    }
+
+    registerServiceWorker();
+    maybeNotify();
+    setInterval(function () {
+        if (state.settings.theme === 'auto') applyTheme();
+        if (todayStr() !== ui.today) { ui.today = todayStr(); renderAll(); maybeNotify(); }
+    }, 60000);
 }
 
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();

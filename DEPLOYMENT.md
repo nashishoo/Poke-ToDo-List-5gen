@@ -1,36 +1,32 @@
 # Deployment Checklist
 
-Use this checklist to ensure the **ToDoMon List App** is ready for production/GitHub.
+Lista para dejar **ToDoMon** listo en GitHub Pages.
 
-## Pre-Deployment Checklist
+## Antes de publicar
 
-### Code Quality
-- [ ] All CI checks passing (if configured)
-- [ ] Code reviewed/Self-reviewed
-- [ ] No critical bugs in the console
-- [ ] Security: No exposed API keys or secrets in code
+### Código
+- [ ] El workflow "Pre-deploy Checks" está en verde (sintaxis JS, manifest, iconos, precarga del service worker, referencias locales)
+- [ ] Sin errores en la consola al cargar
+- [ ] Sin claves ni secretos en el código
 
-### Dependencies & Setup
-- [ ] All files tracked in git (check `.gitignore`)
-- [ ] `README.md` is up-to-date and accurate
-- [ ] `LICENSE` file included (optional but recommended)
+### Funcionalidad
+- [ ] Crear, editar, completar y eliminar tareas (con deshacer)
+- [ ] Subtareas: evolución al 50% y al 100%, y la tarea vuelve a pendiente al desmarcar
+- [ ] Fechas límite, prioridades, recurrencias, búsqueda y filtros
+- [ ] Pokédex, tarjeta de entrenador, medallas y estadísticas
+- [ ] El hábitat muestra los Pokémon de las tareas
+- [ ] Los datos persisten al recargar y se migran desde v5.2/v5.3 sin pérdidas
+- [ ] Tema: auto → día → noche
+- [ ] Recargar sin conexión (con el service worker activo) sigue mostrando la app
 
-### Functionality Check
-- [ ] Tasks can be added, edited, deleted
-- [ ] Subtasks update progress correctly
-- [ ] Evolution system works (50%, 100%)
-- [ ] **Pokédex Dashboard**: Tracks captured Pokémon correctly
-- [ ] **Habitat**: Pokémon appear and move in the footer
-- [ ] LocalStorage persists data after refresh
-- [ ] Mode toggle (Dark/Light) works
+### Infraestructura
+- [x] Repositorio de GitHub creado
+- [x] GitHub Pages: se publica automáticamente desde `master` (carpeta raíz, build legacy). No hay paso de compilación.
+- [ ] Workflow "Pre-deploy Checks" en verde
 
-### Infrastructure & Hosting
-- [ ] GitHub Repository created
-- [ ] GitHub Pages configured (if applicable)
+## Publicar una versión
 
-## Release Steps
-1.  Bump version in `README.md` (if applicable).
-2.  Commit all changes: `git commit -am "Prepare for release"`
-3.  Push to main: `git push origin main`
-4.  Create a tag: `git tag v1.0.0`
-5.  Push tag: `git push origin v1.0.0`
+1.  Subir la versión en `README.md`, en los `?v=` de `index.html`, en la lista `SHELL` de `sw.js` y en `APP_VERSION` (`js/data.js`). El workflow verifica que index y sw coincidan.
+2.  Commit y push mediante un Pull Request hacia `master`.
+3.  Al mergear, GitHub Pages publica solo.
+4.  (Opcional) Etiquetar: `git tag v6.0.0 && git push origin v6.0.0`.
