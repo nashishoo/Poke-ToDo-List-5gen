@@ -1,37 +1,47 @@
-name: Deploy Checks
+name: Pre-deploy Checks
+
+# GitHub Pages se publica automáticamente desde la rama master (build "legacy",
+# carpeta raíz). Este workflow solo valida el sitio; no despliega nada.
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
+
+permissions:
+  contents: read
 
 jobs:
-  pre-deploy-checks:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Verify Branch
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "✅ Branch check passed"
-          else
-             echo "⚠️ Not on main branch"
-          fi
 
-      - name: Check for Critical Files
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Archivos críticos presentes
         run: |
-          if [ ! -f "index.html" ]; then
-            echo "❌ index.html missing!"
-            exit 1
-          fi
-          if [ ! -f "js/app.js" ]; then
-            echo "❌ js/app.js missing!"
-            exit 1
-          fi
-          if [ ! -f "css/style.css" ]; then
-            echo "❌ css/style.css missing!"
-            exit 1
-          fi
-          echo "✅ Critical files present"
+          for f in index.html js/app.js css/style.css css/habitat-style.css favicon.svg; do
+            if [ ! -f "$f" ]; then echo "❌ Falta $f"; exit 1; fi
+          done
+          echo "✅ Archivos críticos presentes"
+
+      - name: Sintaxis de JavaScript
+        run: node --check js/app.js && echo "✅ js/app.js sin errores de sintaxis"
+
+      - name: Referencias locales de index.html existen
+        run: |
+          missing=0
+          for ref in $(grep -oE '(href|src)="[^"]+"' index.html | sed -E 's/^(href|src)="([^"?#]+).*/\2/' | grep -vE '^(https?:|data:|#)'); do
+            if [ ! -f "$ref" ]; then echo "❌ index.html referencia $ref, que no existe"; missing=1; fi
+          done
+          [ "$missing" -eq 0 ] && echo "✅ Todas las referencias locales existen"
+          exit $missing
+
+      - name: Sin document.write
+        run: |
+          if grep -n "document.write" index.html js/app.js; then echo "❌ Evitar document.write"; exit 1; fi
+          echo "✅ Sin document.write"
