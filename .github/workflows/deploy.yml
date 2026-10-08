@@ -24,24 +24,61 @@ jobs:
 
       - name: Archivos críticos presentes
         run: |
-          for f in index.html js/app.js css/style.css css/habitat-style.css favicon.svg; do
+          for f in index.html favicon.svg manifest.webmanifest sw.js \
+                   css/style.css css/habitat-style.css \
+                   js/data.js js/store.js js/sprites.js js/habitat.js js/app.js \
+                   icons/icon-192.png icons/icon-512.png icons/icon-maskable-512.png icons/apple-touch-icon.png; do
             if [ ! -f "$f" ]; then echo "❌ Falta $f"; exit 1; fi
           done
           echo "✅ Archivos críticos presentes"
 
       - name: Sintaxis de JavaScript
-        run: node --check js/app.js && echo "✅ js/app.js sin errores de sintaxis"
+        run: |
+          for f in js/*.js sw.js; do node --check "$f" || exit 1; done
+          echo "✅ JavaScript sin errores de sintaxis"
+
+      - name: Manifest válido e iconos existentes
+        run: |
+          node -e '
+            const fs = require("fs");
+            const m = JSON.parse(fs.readFileSync("manifest.webmanifest", "utf8"));
+            for (const k of ["name", "short_name", "start_url", "display", "icons"]) if (!m[k]) throw new Error("Falta " + k + " en el manifest");
+            for (const i of m.icons) if (!fs.existsSync(i.src)) throw new Error("Icono inexistente: " + i.src);
+            console.log("✅ manifest.webmanifest válido");
+          '
+
+      - name: El service worker solo precarga archivos existentes
+        run: |
+          node -e '
+            const fs = require("fs");
+            const src = fs.readFileSync("sw.js", "utf8");
+            const list = src.slice(src.indexOf("const SHELL = ["), src.indexOf("];", src.indexOf("const SHELL = [")));
+            const files = [...list.matchAll(/"\.\/([^"?]*)[^"]*"|\x27\.\/([^\x27?]*)[^\x27]*\x27/g)].map(m => m[1] || m[2]).filter(Boolean);
+            const missing = files.filter(f => !fs.existsSync(f));
+            if (missing.length) throw new Error("sw.js precarga archivos inexistentes: " + missing.join(", "));
+            console.log("✅ sw.js precarga " + files.length + " archivos existentes");
+          '
 
       - name: Referencias locales de index.html existen
         run: |
-          missing=0
-          for ref in $(grep -oE '(href|src)="[^"]+"' index.html | sed -E 's/^(href|src)="([^"?#]+).*/\2/' | grep -vE '^(https?:|data:|#)'); do
-            if [ ! -f "$ref" ]; then echo "❌ index.html referencia $ref, que no existe"; missing=1; fi
+          node -e '
+            const fs = require("fs");
+            const html = fs.readFileSync("index.html", "utf8");
+            const refs = [...html.matchAll(/(?:href|src)="([^"]+)"/g)].map(m => m[1].split(/[?#]/)[0])
+              .filter(r => r && !/^(https?:|data:)/.test(r));
+            const bad = [...new Set(refs)].filter(r => !fs.existsSync(r));
+            bad.forEach(r => console.log("❌ index.html referencia " + r + ", que no existe"));
+            process.exit(bad.length ? 1 : 0);
+          ' && echo "✅ Todas las referencias locales existen"
+
+      - name: Versiones de caché coherentes (index.html y sw.js)
+        run: |
+          for ref in $(grep -oE '(css|js)/[a-z-]+\.(css|js)\?v=[0-9.]+' index.html); do
+            if ! grep -q "./$ref" sw.js; then echo "❌ sw.js no precarga $ref (¿se olvidó subir la versión?)"; exit 1; fi
           done
-          [ "$missing" -eq 0 ] && echo "✅ Todas las referencias locales existen"
-          exit $missing
+          echo "✅ index.html y sw.js usan las mismas versiones"
 
       - name: Sin document.write
         run: |
-          if grep -n "document.write" index.html js/app.js; then echo "❌ Evitar document.write"; exit 1; fi
+          if grep -n "document.write" index.html js/*.js; then echo "❌ Evitar document.write"; exit 1; fi
           echo "✅ Sin document.write"
