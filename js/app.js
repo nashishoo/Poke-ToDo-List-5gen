@@ -69,373 +69,106 @@ const CATEGORIES = {
     }
 };
 
-const GYM_EVOLUTIONS = {
-    // Gen 1 - Kanto
-    1: [1, 2, 3],      // Bulbasaur → Ivysaur → Venusaur
-    2: [4, 5, 6],      // Charmander → Charmeleon → Charizard
-    3: [7, 8, 9],      // Squirtle → Wartortle → Blastoise
-    4: [43, 44, 45],   // Oddish → Gloom → Vileplume
-    5: [60, 61, 62],   // Poliwag → Poliwhirl → Poliwrath
-    6: [74, 75, 76],   // Geodude → Graveler → Golem
-    7: [92, 93, 94],   // Gastly → Haunter → Gengar
-    8: [109, 110],     // Koffing → Weezing
-    9: [133, 470],     // Eevee → Leafeon (Glaceon en agua)
-    // Gen 2 - Johto
-    10: [152, 153, 154], // Chikorita → Bayleef → Meganium
-    11: [155, 156, 157], // Cyndaquil → Quilava → Typhlosion
-    12: [158, 159, 160], // Totodile → Croconaw → Feraligatr
-    13: [161, 162],     // Sentret → Furret
-    14: [165, 166],     // Ledyba → Ledian
-    15: [167, 168],     // Spinarak → Ariados
-    16: [170, 171],     // Chinchou → Lanturn
-    17: [173, 174],     // Cleffa → Clefairy → (no Jiggly en gym)
-    18: [187, 188, 189], // Hoppip → Skiploom → Jumpluff
-    19: [191, 192],     // Sunkern → Sunflora
-    20: [194, 195],     // Wooper → Quagsire
-    // Gen 3 - Hoenn
-    21: [258, 259, 260], // Mudkip → Marshtomp → Swampert
-    22: [261, 262],     // Poochyena → Mightyena
-    23: [271, 272],     // Lotad → Lombre
-    24: [273, 274],     // Seedot → Nuzleaf
-    25: [276, 277],     // Taillow → Swellow
-    26: [278, 279],     // Wingull → Pelipper
-    27: [280, 281, 282], // Ralts → Kirlia → Gardevoir
-    28: [283, 284],     // Surskit → Masquerain
-    29: [300, 301],     // Mawile
-    // Gen 4 - Sinnoh
-    31: [387, 388, 389], // Turtwig → Grotle → Torterra
-    32: [390, 391, 392], // Chimchar → Monferno → Infernape
-    33: [393, 394, 395], // Piplup → Prinplup → Empoleon
-    34: [408, 409, 410], // Cranidos → Rampardos (Shieldon → Bastiodon)
-    35: [415, 416],     // Burmy → Wormadam
-    36: [420, 421],     // Cherubi → Cherrim
-    37: [433, 434],     // Stunky → Skuntank
-    // Gen 5 - Unova
-    38: [495, 496, 497], // Snivy → Servine → Serperior
-    39: [498, 499, 500], // Tepig → Pignite → Emboar
-    40: [501, 502, 503], // Oshawott → Dewott → Samurott
-    41: [519, 520, 521], // Patrat → Watchog (Purrloin → Liepard)
-    42: [522, 523],     // Blitzle → Zebstrika
-    43: [532, 533, 534], // Timburr → Gurdurr → Conkeldurr
-    44: [540, 541, 542], // Sewaddle → Swadloon → Leavanny
-    45: [543, 544, 545], // Venipede → Whirlipede → Scolipede
-    46: [546, 547, 548], // Cottonee → Whimsicott (Petilil → Lilligant)
-    47: [550, 551, 552], // Basculin → (Red-Striped) → Braviary
-    48: [554, 555],     // Darumaka → Darmanitan
-    49: [556, 557],     // Maractus → (no evolution)
-    50: [559, 560],     // Scraggy → Scrafty
-    51: [561, 562],     // Sigilyph → (no evolution)
-    52: [570, 571],     // Zorua → Zoruark
-    53: [572, 573],     // Minccino → Cinccino
-    54: [574, 575, 576], // Gothita → Gothorita → Gothitelle
-    55: [577, 578, 579], // Solosis → Duosion → Reuniclus
-    56: [588, 589],     // Karrablast → Escavalier
-    57: [590, 591],     // Foongus → Amoonguss
-    58: [592, 593],     // Frillish → Jellicent
-    59: [597, 598],     // Ferroseed → Ferrothorn
-    60: [600, 601],     // Klink → Klang
-    61: [602, 603],     // Tynamo → Eelektrik
-    62: [604, 605, 606], // Elgyem → Beheeyem (Litwick → Lampent → Chandelure)
-    63: [608, 609],     // Lampent → Chandelure
-    64: [610, 611, 612], // Axew → Fraxure → Haxorus
-    65: [613, 614],     // Cubchoo → Beartic
-    66: [615, 616],     // Cryogonal → (no evolution)
-    67: [618, 619],     // Stunfisk → (no evolution)
-    68: [622, 623, 624], // Golett → Golurk → (no 3rd)
-    69: [625, 626],     // Braviary → (no evolution, pero Hydreigon tiene 3)
-    70: [633, 634, 635], // Deino → Zweigous → Hydreigon
-    71: [636, 637, 638], // Larvesta → Volcarona → (no)
+// Cadenas evolutivas Gen 1-5, verificadas contra PokeAPI (pokemon-species.evolves_from_species)
+const GYM_EVOLUTIONS = [
+    // Gen 1
+    [1, 2, 3],        // Bulbasaur → Ivysaur → Venusaur
+    [4, 5, 6],        // Charmander → Charmeleon → Charizard
+    [7, 8, 9],        // Squirtle → Wartortle → Blastoise
+    [43, 44, 45],     // Oddish → Gloom → Vileplume
+    [60, 61, 62],     // Poliwag → Poliwhirl → Poliwrath
+    [74, 75, 76],     // Geodude → Graveler → Golem
+    [92, 93, 94],     // Gastly → Haunter → Gengar
+    [109, 110],       // Koffing → Weezing
+    [133, 470],       // Eevee → Leafeon
+    // Gen 2
+    [152, 153, 154],  // Chikorita → Bayleef → Meganium
+    [155, 156, 157],  // Cyndaquil → Quilava → Typhlosion
+    [158, 159, 160],  // Totodile → Croconaw → Feraligatr
+    [161, 162],       // Sentret → Furret
+    [165, 166],       // Ledyba → Ledian
+    [167, 168],       // Spinarak → Ariados
+    [170, 171],       // Chinchou → Lanturn
+    [173, 35, 36],    // Cleffa → Clefairy → Clefable
+    [187, 188, 189],  // Hoppip → Skiploom → Jumpluff
+    [191, 192],       // Sunkern → Sunflora
+    [194, 195],       // Wooper → Quagsire
+    // Gen 3
+    [258, 259, 260],  // Mudkip → Marshtomp → Swampert
+    [261, 262],       // Poochyena → Mightyena
+    [270, 271, 272],  // Lotad → Lombre → Ludicolo
+    [273, 274, 275],  // Seedot → Nuzleaf → Shiftry
+    [276, 277],       // Taillow → Swellow
+    [278, 279],       // Wingull → Pelipper
+    [280, 281, 282],  // Ralts → Kirlia → Gardevoir
+    [283, 284],       // Surskit → Masquerain
+    [300, 301],       // Skitty → Delcatty
+    // Gen 4
+    [387, 388, 389],  // Turtwig → Grotle → Torterra
+    [390, 391, 392],  // Chimchar → Monferno → Infernape
+    [393, 394, 395],  // Piplup → Prinplup → Empoleon
+    [408, 409],       // Cranidos → Rampardos
+    [410, 411],       // Shieldon → Bastiodon
+    [415, 416],       // Combee → Vespiquen
+    [420, 421],       // Cherubi → Cherrim
+    [434, 435],       // Stunky → Skuntank
+    // Gen 5
+    [495, 496, 497],  // Snivy → Servine → Serperior
+    [498, 499, 500],  // Tepig → Pignite → Emboar
+    [501, 502, 503],  // Oshawott → Dewott → Samurott
+    [519, 520, 521],  // Pidove → Tranquill → Unfezant
+    [522, 523],       // Blitzle → Zebstrika
+    [532, 533, 534],  // Timburr → Gurdurr → Conkeldurr
+    [540, 541, 542],  // Sewaddle → Swadloon → Leavanny
+    [543, 544, 545],  // Venipede → Whirlipede → Scolipede
+    [546, 547],       // Cottonee → Whimsicott
+    [548, 549],       // Petilil → Lilligant
+    [551, 552, 553],  // Sandile → Krokorok → Krookodile
+    [554, 555],       // Darumaka → Darmanitan
+    [557, 558],       // Dwebble → Crustle
+    [559, 560],       // Scraggy → Scrafty
+    [562, 563],       // Yamask → Cofagrigus
+    [570, 571],       // Zorua → Zoroark
+    [572, 573],       // Minccino → Cinccino
+    [574, 575, 576],  // Gothita → Gothorita → Gothitelle
+    [577, 578, 579],  // Solosis → Duosion → Reuniclus
+    [588, 589],       // Karrablast → Escavalier
+    [590, 591],       // Foongus → Amoonguss
+    [592, 593],       // Frillish → Jellicent
+    [597, 598],       // Ferroseed → Ferrothorn
+    [599, 600, 601],  // Klink → Klang → Klinklang
+    [602, 603, 604],  // Tynamo → Eelektrik → Eelektross
+    [605, 606],       // Elgyem → Beheeyem
+    [607, 608, 609],  // Litwick → Lampent → Chandelure
+    [610, 611, 612],  // Axew → Fraxure → Haxorus
+    [613, 614],       // Cubchoo → Beartic
+    [616, 617],       // Shelmet → Accelgor
+    [619, 620],       // Mienfoo → Mienshao
+    [622, 623],       // Golett → Golurk
+    [624, 625],       // Pawniard → Bisharp
+    [633, 634, 635],  // Deino → Zweilous → Hydreigon
+    [636, 637],       // Larvesta → Volcarona
+];
+
+// v5.3: cadenas erróneas de v5.2 -> cadena corregida (migración de datos guardados)
+const CHAIN_FIXES = {
+    '173,174': [173, 35, 36],
+    '408,409,410': [408, 409],
+    '433,434': [434, 435],
+    '546,547,548': [546, 547],
+    '550,551,552': [551, 552, 553],
+    '556,557': [557, 558],
+    '561,562': [562, 563],
+    '604,605,606': [605, 606],
+    '615,616': [616, 617],
+    '618,619': [619, 620],
+    '622,623,624': [622, 623],
+    '625,626': [624, 625],
+    '636,637,638': [636, 637]
 };
 
-// Pokémon que Ash ha tenido en el anime (Gen 1-5)
-const ASH_POKEMON = [
-    // Pikachu (su compañero principal)
-    25, // Pikachu
-    // Gen 1
-    1, 2, 3,    // Bulbasaur, Ivysaur, Venusaur
-    4, 5, 6,    // Charmander, Charmeleon, Charizard
-    7, 8, 9,    // Squirtle, Wartortle, Blastoise
-    10,         // Caterpie
-    11, 12,     // Metapod, Butterfree
-    13, 14, 15, // Weedle, Kakuna, Beedrill
-    16, 17, 18, // Pidgey, Pidgeotto, Pidgeot
-    19, 20,     // Rattata, Raticate
-    21,         // Spearow
-    22,         // Fearow
-    23, 24,     // Ekans, Arbok
-    26,         // Raichu
-    27, 28,     // Sandshrew, Sandslash
-    29, 30, 31, // Nidoran♀, Nidorina, Nidoqueen
-    32, 33, 34, // Nidoran♂, Nidorino, Nidoking
-    35, 36,     // Clefairy, Clefable
-    37, 38,     // Vulpix, Ninetales
-    39, 40,     // Jigglypuff, Wigglytuff
-    41, 42,     // Zubat, Golbat
-    43, 44, 45, // Oddish, Gloom, Vileplume
-    46, 47,     // Paras, Parasect
-    48, 49,     // Venonat, Venomoth
-    50, 51,     // Diglett, Dugtrio
-    52, 53,     // Meowth, Persian
-    54, 55,     // Psyduck, Golduck
-    56, 57,     // Mankey, Primeape
-    58, 59,     // Growlithe, Arcanine
-    60, 61, 62, // Poliwag, Poliwhirl, Poliwrath
-    63, 64, 65, // Abra, Kadabra, Alakazam
-    66, 67, 68, // Machop, Machoke, Machamp
-    69, 70, 71, // Bellsprout, Weepinbell, Victreebel
-    72, 73,     // Tentacool, Tentacruel
-    74, 75, 76, // Geodude, Graveler, Golem
-    77, 78,     // Ponyta, Rapidash
-    79, 80,     // Slowpoke, Slowbro
-    81, 82,     // Magnemite, Magneton
-    83, 84, 85, // Farfetch'd, Doduo, Dodrio
-    86, 87, 88, // Seel, Dewgong, Grimer
-    89, 90, 91, // Muk, Shellder, Cloyster
-    92, 93, 94, // Gastly, Haunter, Gengar
-    95, 96,     // Onix, Drowzee
-    97, 98, 99, // Krabby, Kingler, Voltorb
-    100, 101,   // Electrode, Exeggcute
-    102, 103,   // Exeggutor, Cubone
-    104, 105,   // Marowak, Hitmonlee
-    106, 107,   // Hitmonchan, Lickitung
-    108, 109, 110, // Koffing, Weezing, Rhyhorn
-    111, 112,   // Rhyodon, Chansey
-    113, 114,   // Tangela, Kangaskhan
-    115,         // Mr. Mime
-    116, 117,   // Scyther, Jynx
-    118, 119,   // Poliwag evolution (Staryu, Starmie en otra)
-    120, 121,   // Staryu, Starmie
-    122,         // Mr. Mime (duplicate)
-    123, 124,   // Scyther (duplicate), Jynx (duplicate)
-    125, 126,   // Electabuzz, Magmar
-    127, 128,   // Pinsir, Tauros
-    129, 130,   // Magikarp, Gyarados
-    131, 132,   // Lapras, Ditto
-    133, 134,   // Eevee, Vaporeon
-    135, 136,   // Jolteon, Flareon
-    137, 138,   // Porygon, Omanyte
-    139, 140,   // Omastar, Kabuto
-    141, 142,   // Kabutops, Aerodactyl
-    143, 144,   // Snorlax, Articuno
-    145, 146,   // Zapdos, Moltres
-    147, 148, 149, // Dratini, Dragonair, Dragonite
-    150, 151,   // Mewtwo, Mew
-    // Gen 2
-    152, 153, 154, // Chikorita, Bayleef, Meganium
-    155, 156, 157, // Cyndaquil, Quilava, Typhlosion
-    158, 159, 160, // Totodile, Croconaw, Feraligatr
-    161, 162,     // Sentret, Furret
-    163, 164,     // Hoothoot, Noctowl
-    165, 166,     // Ledyba, Ledian
-    167, 168,     // Spinarak, Ariados
-    169, 170, 171, // Crobat, Chinchou, Lanturn
-    172, 173, 174, // Pichu, Cleffa, Igglybuff
-    175, 176,     // Togepi, Togetic
-    177, 178,     // Natu, Xatu
-    179, 180,     // Mareep, Flaaffy
-    181, 182,     // Ampharos, Bellossom
-    183, 184,     // Marill, Azumarill
-    185, 186,     // Sudowoodo, Politoed
-    187, 188, 189, // Hoppip, Skiploom, Jumpluff
-    190, 191, 192, // Aipom, Sunkern, Sunflora
-    193, 194, 195, // Yanma, Wooper, Quagsire
-    196, 197,     // Espeon, Umbreon
-    198, 199,     // Murkrow, Slowking
-    200, 201,     // Misdreavus, Unown
-    202, 203,     // Wobbuffet, Girafarig
-    204, 205,     // Pineco, Forretress
-    206, 207,     // Dunsparce, Gligar
-    208, 209,     // Steelix, Snubbull
-    210, 211,     // Granbull, Qwilfish
-    212, 213,     // Scizor, Shuckle
-    214, 215,     // Heracross, Sneasel
-    216, 217,     // Teddiursa, Ursaring
-    218, 219,     // Slugma, Magcargo
-    220, 221,     // Swinub, Piloswine
-    222, 223,     // Corsola, Remoraid
-    224, 225,     // Octillery, Delibird
-    226, 227,     // Mantine, Skarmory
-    228, 229,     // Houndour, Houndoom
-    230, 231,     // Kingdra, Phanpy
-    232, 233,     // Donphan, Porygon2
-    234, 235,     // Stantler, Smeargle
-    236, 237,     // Tyrogue, Hitmontop
-    238, 239,     // Smoochum, Elekid
-    240, 241,     // Magby, Miltank
-    242, 243, 244, // Blissey, Raikou, Entei
-    245, 246,     // Suicune, Larvitar
-    247, 248,     // Pupitar, Tyranitar
-    249, 250,     // Lugia, Ho-Oh
-    251,         // Celebi
-    // Gen 3
-    252, 253, 254, // Treecko, Grovyle, Sceptile
-    255, 256, 257, // Torchic, Combusken, Blaziken
-    258, 259, 260, // Mudkip, Marshtomp, Swampert
-    261, 262,     // Poochyena, Mightyena
-    263, 264,     // Zigzagoon, Linoone
-    265, 266,     // Wurmple, Silcoon
-    267, 268,     // Beautifly, Cascoon
-    269, 270, 271, // Dustox, Lotad, Lombre
-    272, 273, 274, // Seedot, Nuzleaf, Shiftry
-    275, 276,     // Taillow, Swellow
-    277, 278,     // Wingull, Pelipper
-    279, 280, 281, // Ralts, Kirlia, Gardevoir
-    282, 283,     // Surskit, Masquerain
-    284, 285,     // Shroomish, Breloom
-    286, 287,     // Slakoth, Vigoroth
-    288, 289,     // Slaking, Nincada
-    290, 291,     // Ninjask, Shedinja
-    292, 293,     // Whismur, Loudred
-    294, 295,     // Exploud, Makuhita
-    296, 297,     // Hariyama, Azurill
-    298, 299,     // Nosepass, Skitty
-    300, 301,     // Mawile, Delcatty
-    302, 303,     // Sableye, Mawile (dup)
-    304, 305,     // Aron, Lairon
-    306, 307,     // Aggron, Meditite
-    308, 309,     // Medicham, Plusle
-    310, 311,     // Minun, Volbeat
-    312, 313,     // Illumise, Volbeat (dup)
-    314, 315,     // Roselia, Gulpin
-    316, 317,     // Swalot, Carvanha
-    318, 319,     // Sharpedo, Wailmer
-    320, 321,     // Wailord, Numel
-    322, 323,     // Camerupt, Torkoal
-    324, 325,     // Spoink, Grumpig
-    326, 327,     // Spinda, Trapinch
-    328, 329,     // Vibrava, Flygon
-    330, 331,     // Cacnea, Cacturne
-    332, 333,     // Swablu, Altaria
-    334, 335,     // Zangoose, Seviper
-    336, 337,     // Lunatone, Solrock
-    338, 339,     // Barboach, Whiscash
-    340, 341,     // Corphish, Crawdaunt
-    342, 343,     // Baltoy, Claydol
-    344, 345,     // Lileep, Cradily
-    346, 347,     // Anorith, Armaldo
-    348, 349,     // Feebas, Milotic
-    350, 351,     // Castform, Kecleon
-    352, 353,     // Shuppet, Banette
-    354, 355,     // Duskull, Dusclops
-    356, 357,     // Tropius, Chimecho
-    358, 359,     // Absol, Wynaut
-    360, 361,     // Snorunt, Glalie
-    362, 363,     // Spheal, Sealeo
-    364, 365,     // Walrein, Clamperl
-    366, 367,     // Huntail, Gorebyss
-    368, 369,     // Relicanth, Luvdisc
-    370, 371,     // Bagon, Shelgon
-    372, 373,     // Salamence, Beldum
-    374, 375, 376, // Metang, Metagross, Regirock
-    377, 378,     // Regice, Registeel
-    379, 380,     // Latias, Latios
-    381, 382,     // Kyogre, Groudon
-    383, 384,     // Rayquaza, Jirachi
-    385, 386,     // Deoxys, Jirachi (dup)
-    // Gen 4
-    387, 388, 389, // Turtwig, Grotle, Torterra
-    390, 391, 392, // Chimchar, Monferno, Infernape
-    393, 394, 395, // Piplup, Prinplup, Empoleon
-    396, 397,     // Starly, Staravia
-    398, 399,     // Staraptor, Bidoof
-    400, 401,     // Bibarel, Kricketot
-    402, 403,     // Kricketune, Shinx
-    404, 405,     // Luxio, Luxray
-    406, 407,     // Budew, Roserade
-    408, 409, 410, // Cranidos, Rampardos, Shieldon
-    411, 412,     // Bastiodon, Burmy
-    413, 414,     // Wormadam, Mothim
-    415, 416,     // Combee, Vespiquen
-    417, 418,     // Pachirisu, Buizel
-    419, 420,     // Floatzel, Cherubi
-    421, 422,     // Cherrim, Shellos
-    423, 424,     // Gastrodon, Ambipom
-    425, 426,     // Drifloon, Drifblim
-    427, 428,     // Buneary, Lopunny
-    429, 430,     // Mismagius, Honchkrow
-    431, 432,     // Glameow, Purugly
-    433, 434,     // Chingling, Stunky
-    435, 436,     // Skuntank, Bronzor
-    437, 438,     // Bronzong, Bonsly
-    439, 440,     // Mime Jr., Happiny
-    441, 442,     // Chatot, Spiritomb
-    443, 444,     // Gible, Gabite
-    445, 446,     // Garchomp, Lucario
-    447, 448,     // Riolu, Hippopotas
-    449, 450,     // Hippowdon, Skorupi
-    451, 452,     // Drapion, Croagunk
-    453, 454,     // Toxicroak, Carnivine
-    454, 455,     // Carnivine (dup), Finneon
-    456, 457,     // Lumineon, Snover
-    458, 459,     // Abomasnow, Weavile
-    460, 461,     // Lickilicky, Rhyperior
-    462, 463,     // Tangrowth, Electivire
-    463, 464,     // Magmortar, Togekiss
-    465, 466,     // Yanmega, Leafeon
-    467, 468,     // Glaceon, Glalie
-    469, 470,     // Froslass, Mamoswine
-    471, 472,     // Porygon-Z, Gallade
-    473, 474,     // Probopass, Dusknoir
-    475, 476,     // Froslass (dup), Rotom
-    477, 478,     // Uxie, Mesprit
-    479, 480,     // Azelf, Heatran
-    481, 482,     // Regigigas, Giratina
-    483, 484,     // Cresselia, Phione
-    485, 486,     // Manaphy, Darkrai
-    487, 488,     // Shaymin, Arceus
-    // Gen 5
-    494, 495, 496, // Victini, Snivy, Servine
-    497, 498, 499, // Serperior, Tepig, Pignite
-    500, 501, 502, // Emboar, Oshawott, Dewott
-    503, 504, 505, // Samurott, Patrat, Watchog
-    506, 507, 508, // Lillipup, Herdier, Stoutland
-    509, 510,     // Purrloin, Liepard
-    511, 512,     // Pansage, Simisage
-    513, 514,     // Pansear, Simisear
-    514, 515,     // Simisear (dup), Panpour
-    516, 517,     // Simipour, Munna
-    518, 519,     // Musharna, Pidove
-    520, 521,     // Tranquill, Unfezant
-    522, 523,     // Blitzle, Zebstrika
-    524, 525,     // Roggenrola, Boldore
-    526, 527,     // Gigalith, Woobat
-    528, 529,     // Swoobat, Drilbur
-    530, 531,     // Excadrill, Audino
-    532, 533, 534, // Timburr, Gurdurr, Conkeldurr
-    535, 536,     // Tympole, Palpitoad
-    537, 538,     // Seismitoad, Throh
-    539, 540,     // Sawk, Sewaddle
-    541, 542,     // Swadloon, Venipede
-    543, 544,     // Whirlipede, Scolipede
-    545, 546,     // Cottonee, Whimsicott
-    547, 548,     // Petilil, Lilligant
-    549, 550,     // Basculin, Sandile
-    551, 552,     // Krokorok, Karrablast
-    553, 554,     // Escavalier, Foongus
-    555, 556,     // Amoonguss, Frillish
-    557, 558,     // Jellicent, Alomomola
-    559, 560,     // Tynamo, Eelektrik
-    561, 562,     // Eelektross, Elgyem
-    563, 564,     // Beheeyem, Lampent
-    565, 566,     // Chandelure, Axew
-    567, 568,     // Fraxure, Cubchoo
-    569, 570,     // Beartic, Cryogonal
-    571, 572,     // Stunfisk, Mienfoo
-    573, 574,     // Mienshao, Druddigon
-    575, 576,     // Golett, Golurk
-    577, 578,     // Pawniard, Bisharp
-    579, 580,     // Bouffalant, Rufflet
-    581, 582,     // Braviary, Vullaby
-    583, 584,     // Heatmor, Durant
-    585, 586,     // Deino, Zweigous
-    587, 588,     // Hydreigon, Larvesta
-    589, 590,     // Volcarona, Cobalion
-    591, 592,     // Terrakion, Virizion
-    593, 594,     // Tornadus, Thundurus
-    595, 596,     // Reshiram, Zekrom
-    597, 598,     // Kyurem, Keldeo
-    599, 600,     // Meloetta, Genesect
-];
+// Pool de la categoría Ideas: cualquier Pokémon de Gen 1-5 (#1-#649)
+const IDEAS_POKEMON_POOL = Array.from({ length: 649 }, (_, i) => i + 1);
 
 // Fire-type Pokémon (Urgente category)
 const FIRE_TYPES = [
@@ -604,52 +337,8 @@ const ADVENTURE_ITEMS = [
     { id: 'sunstone', name: 'Sun Stone', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/sun-stone.png' },
 ];
 
-const LEGENDARY_POKEMON = [
-    [144, 145, 146], [150, 151], [243, 244, 245], [249, 250], [377, 378], [380, 381],
-    [382, 383], [384, 385], [483, 484], [638, 639, 640], [716, 717], [806, 807], [905, 906]
-];
-
 // Pool de Pokémon aleatorios para el header (Gen 1-5)
-const HEADER_POKEMON_POOL = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 25, 26, 39, 40, 52, 53, 54, 55,
-    58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
-    76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 88, 89, 90, 91, 92, 93, 94,
-    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
-    111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125,
-    126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
-    141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
-    156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
-    171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185,
-    186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200,
-    201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215,
-    216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230,
-    231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245,
-    246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260,
-    261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
-    276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290,
-    291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305,
-    306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320,
-    321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335,
-    336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350,
-    351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365,
-    366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380,
-    381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395,
-    396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410,
-    411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425,
-    426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440,
-    441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455,
-    456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470,
-    471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485,
-    486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500,
-    501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515,
-    516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530,
-    531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545,
-    546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560,
-    561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575,
-    576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590,
-    591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605,
-    606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616
-];
+const HEADER_POKEMON_POOL = Array.from({ length: 649 }, (_, i) => i + 1);
 
 const APP_NAME_KEY = 'todopkmn_app_name';
 const HEADER_POKEMON_KEY = 'todopkmn_header_pokemon';
@@ -766,21 +455,15 @@ function getEvolutionChain(category, subtaskCount) {
         }
         chain = items;
     } else if (category === 'work') {
-        const keys = Object.keys(GYM_EVOLUTIONS);
-        chain = GYM_EVOLUTIONS[keys[(now + subtaskCount) % keys.length]];
+        chain = GYM_EVOLUTIONS[(now + subtaskCount) % GYM_EVOLUTIONS.length];
     } else if (category === 'ideas') {
-        const randomIndex = (now + subtaskCount) % ASH_POKEMON.length;
-        const pokemonId = ASH_POKEMON[randomIndex];
+        const randomIndex = (now + subtaskCount) % IDEAS_POKEMON_POOL.length;
+        const pokemonId = IDEAS_POKEMON_POOL[randomIndex];
         isShiny = Math.random() < 0.3;
 
         chain = [pokemonId];
-        for (const key in GYM_EVOLUTIONS) {
-            const evoChain = GYM_EVOLUTIONS[key];
-            if (evoChain.includes(pokemonId)) {
-                chain = evoChain;
-                break;
-            }
-        }
+        const evoChain = GYM_EVOLUTIONS.find(function (c) { return c.includes(pokemonId); });
+        if (evoChain) chain = evoChain;
     } else {
         chain = getEvolutionChainFromPool(category, now, subtaskCount);
     }
@@ -792,10 +475,10 @@ function getEvolutionChain(category, subtaskCount) {
 function getCategoryPokemonPool(category) {
     const pools = {
         urgent: FIRE_TYPES,
-        work: Object.values(GYM_EVOLUTIONS).flat(),
+        work: GYM_EVOLUTIONS.flat(),
         personal: FRIENDLY_TYPES,
         learning: PSYCHIC_TYPES,
-        ideas: ASH_POKEMON,
+        ideas: IDEAS_POKEMON_POOL,
         someday: ADVENTURE_ITEMS
     };
     return pools[category] || FIRE_TYPES;
@@ -806,7 +489,7 @@ function getEvolutionChainFromPool(category, seed, subtaskCount) {
     const pool = getCategoryPokemonPool(category);
 
     const possibleChains = [];
-    Object.values(GYM_EVOLUTIONS).forEach(function (chain) {
+    GYM_EVOLUTIONS.forEach(function (chain) {
         if (pool.includes(chain[0])) {
             possibleChains.push(chain);
         }
@@ -1624,6 +1307,16 @@ function repairData() {
                 console.warn('Reparing evolution data for:', task.title);
                 task.evolutionData = getEvolutionChain(category, task.subtasks.length);
                 hasChanges = true;
+            }
+
+            // 2b. v5.3: corregir cadenas evolutivas erróneas guardadas por v5.2
+            if (!task.evolutionData.isItem) {
+                const fixed = CHAIN_FIXES[task.evolutionData.chain.join(',')];
+                if (fixed) {
+                    task.evolutionData.chain = fixed.slice();
+                    task.currentPokemonId = null; // se recalcula abajo según el progreso
+                    hasChanges = true;
+                }
             }
 
             // 3. Ensure currentPokemonId exists for non-item tasks
