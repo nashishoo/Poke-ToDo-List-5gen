@@ -1,59 +1,66 @@
-# 🎮 ToDoMon List App
+# 🎮 ToDoMon
 
 > **Para los amantes de Pokémon, ¡una Poke ToDo list!**
 
-![ToDoMon App Screenshot](https://i.postimg.cc/ZnnyD7CC/Captura-de-pantalla-19-2-2026-20331.jpg)
+![ToDoMon v6](docs/screenshot-v6.png)
 
 Una aplicación de tareas gamificada donde tus pendientes cobran vida. Cada tarea es un Pokémon que evoluciona a medida que avanzas, transformando tu productividad en una aventura clásica de Pokémon.
 
 > [!NOTE]
-> **Estado Actual (v5.3)**: La aplicación es totalmente funcional. La v5.3 corrigió las cadenas de evolución erróneas, el estado de las tareas al desmarcar subtareas, los nombres de Pokémon al evolucionar y el escalado de los sprites. Ver [Novedades v5.3](#-novedades-v53).
+> **Estado actual (v6.0)**: interfaz nueva inspirada en el C-Gear de Teselia, con fechas límite, prioridades, búsqueda y filtros, tareas recurrentes, deshacer, tarjeta de entrenador con medallas, estadísticas y modo instalable (PWA). Los datos de v5.2 y v5.3 se migran solos, con copia de seguridad. Ver [Novedades v6.0](#-novedades-v60).
 
-> [!TIP]
-> **Futuro del Proyecto**: Se planea una refactorización completa a **React** para mejorar la escalabilidad y el rendimiento en la próxima gran versión.
-
-![Version](https://img.shields.io/badge/version-5.3-blue)
+![Version](https://img.shields.io/badge/version-6.0-blue)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
 
-## ⚡ Características Principales
+## ⚡ Características principales
 
 Esta no es una lista de tareas ordinaria. Aquí, completas misiones para **construir tu equipo Pokémon**:
 
--   **Nuevo: Pokédex Dashboard**: 
-    -   Rastrea todos los Pokémon que has capturado completando tareas.
-    -   Visualiza tu colección con sprites, nombres y fechas de captura.
-    -   Filtra por estado: Capturado (Completado) o En Progreso.
+-   **Tareas que evolucionan**:
+    -   Cada tarea es un Pokémon de su categoría. Al completar el 50% de las subtareas evoluciona, y al 100% llega a su etapa final y queda registrado en tu Pokédex.
+    -   1 de cada 16 completadas resulta **variocolor** ✨ (+25 XP). Las Ideas también pueden nacer variocolor.
+    -   Las tareas de **Algún Día** son objetos de aventura (Poké Balls y piedras evolutivas).
 
--   **Nuevo: Hábitat de Vida Artificial**:
-    -   Tus tareas activas viven en el pie de página como Pokémon reales.
-    -   **Comportamiento Autónomo**: Caminan, descansan y exploran el entorno de forma independiente.
-    -   **Profundidad Visual**: Sistema de capas que da sensación de espacio 3D.
-    -   **Ciclo Día/Noche**: Automático según la hora local (noche de 20:00 a 07:00) o fijo con el botón 🌗/☀️/🌙 del header. De noche el hábitat muestra un cielo estrellado.
-    -   **Sprites animados de 5ta generación**: Los Pokémon usan los GIF animados de Pokémon Negro/Blanco (con respaldo al sprite estático).
+-   **Productividad de verdad**:
+    -   **Agregado rápido** con atajos: `Pagar luz #urgente !alta @mañana *semanal`.
+    -   **Fechas límite** con resaltado de "vence hoy" y "vencida".
+    -   **Prioridades** (alta, media, baja) que suman o restan XP.
+    -   **Recurrentes** diarias y semanales: al completarlas aparece la siguiente.
+    -   **Búsqueda**, filtros por estado y categoría, y orden manual (arrastrar o flechas), por fecha o por prioridad.
+    -   **Deshacer** la última eliminación (Ctrl+Z o el botón del aviso).
+    -   **Atajos de teclado**: `N` nueva tarea, `/` buscar, `1`–`4` cambiar de vista, `?` ayuda.
 
--   **Evolución e Items**:
-    -   Las tareas **Urgentes** e **Ideas** evolucionan como Pokémon reales al completar sus subtareas.
-    -   Las tareas de **Algún Día** (Someday) se representan como objetos de aventura (Pokéballs, Piedras Evolutivas).
+-   **Entrenador, Pokédex y estadísticas**:
+    -   Nivel y experiencia (50 XP por tarea, 10 por subtarea, +20 si es prioridad alta), racha de días y 8 medallas de Teselia por hitos.
+    -   Tarjeta de entrenador con nombre, ID y compañero elegido.
+    -   Pokédex de las generaciones 1 a 5 (649 Pokémon) con porcentaje por región y filtros.
+    -   Estadísticas por semana y por categoría.
 
--   **Sistema de Categorías Expandido**:
+-   **Hábitat**:
+    -   Los Pokémon de tus tareas pasean por la pradera del pie de página; al hacer clic se abre la tarea.
+    -   Ciclo día/noche según el tema. De noche, cielo estrellado.
+
+-   **Instalable y sin conexión**:
+    -   PWA: se puede instalar desde el navegador (botón "Instalar app" en Ajustes cuando el navegador lo permite).
+    -   Funciona sin conexión: la app y los sprites ya vistos cargan desde el service worker.
+    -   Exportar e importar un respaldo JSON (antes de importar se guarda una copia).
+    -   Sonidos (gritos de Pokémon) con interruptor, y avisos opcionales de tareas de hoy o vencidas mientras la app está abierta.
+
+-   **Categorías**:
     -   🔥 **Urgente**: Pokémon de Fuego para máxima prioridad.
-    -   💼 **Trabajo**: Retos de gimnasio y batalla.
-    -   🏠 **Personal**: Pokémon amigables y compañeros.
-    -   📚 **Aprendizaje**: Tipo Psíquico para el conocimiento.
-    -   💡 **Ideas**: Creatividad y Legendarios (¡con probabilidad Shiny!).
-    -   🌟 **Algún Día**: Items y objetos especiales.
+    -   💼 **Trabajo**: cadenas evolutivas completas.
+    -   🏠 **Personal**: Pokémon amigables.
+    -   📚 **Aprendizaje**: tipo Psíquico.
+    -   💡 **Ideas**: legendarios y creativos (con probabilidad variocolor).
+    -   🌟 **Algún Día**: objetos de aventura.
 
--   **Diseño Nostálgico**:
-    -   Fuentes Pixel Art ('Press Start 2P') para la inmersión retro.
-    -   Iconos de acción temáticos: **TM** para editar, **Repel** para borrar, **Rare Candy** para completar.
-    -   Barras de progreso visuales y contadores integrados.
-    -   Efectos holográficos "Shiny" al completar tareas al 100%.
+![ToDoMon en el móvil](docs/screenshot-v6-mobile.png)
 
-## 🚀 Cómo Empezar
+## 🚀 Cómo empezar
 
-No necesitas instalar nada complejo. Es tan simple como abrir una Pokéball.
+No necesitas instalar nada: es HTML, CSS y JavaScript puros, sin compilación.
 
 1.  **Clona el repositorio:**
     ```bash
@@ -62,34 +69,36 @@ No necesitas instalar nada complejo. Es tan simple como abrir una Pokéball.
     ```
 
 2.  **Juega:**
-    -   Abre el archivo `index.html` en tu navegador favorito.
-    -   *(Opcional)* Para escuchar los "crys" de los Pokémon y asegurar que todos los recursos carguen correctamente, usa un servidor local:
+    -   Abre `index.html` directamente en tu navegador (funciona como archivo local).
+    -   Para los gritos de los Pokémon, la instalación como app y el modo sin conexión, sírvela por HTTP:
         ```bash
-        npx serve .
-        # o
         python -m http.server 8000
+        # o
+        npx serve .
         ```
 
 También puedes usarla directamente en GitHub Pages: **https://nashishoo.github.io/Poke-ToDo-List-5gen/**
 
-## 🆕 Novedades v5.3
+## 🆕 Novedades v6.0
 
--   **Evoluciones corregidas**: las 72 cadenas evolutivas están verificadas contra PokeAPI (antes había 13 erróneas, como Larvesta → Volcarona → Cobalion). Las tareas guardadas con cadenas erróneas se corrigen solas al abrir la app.
--   **Desmarcar funciona**: si desmarcas una subtarea (o agregas una nueva al editar), la tarea vuelve a quedar pendiente.
--   **Nombres al día**: cuando un Pokémon evoluciona, su nombre se actualiza en el hábitat y en la Pokédex.
--   **Sprites nítidos**: GIF animados de Negro/Blanco escalados por factores enteros para que los píxeles no se deformen.
--   **Hábitat estable**: los Pokémon ya no "saltan" de posición cuando cambias tus tareas.
--   **Día/Noche real** con modo automático por hora.
--   **Datos seguros**: los datos de versiones anteriores se migran solos; si algo no se puede leer, se respalda en `todopkmn_tasks_backup` en lugar de borrarse.
+-   **Interfaz nueva** estilo C-Gear (Teselia), con tema claro, oscuro y automático, navegación por pestañas y barra inferior en el móvil.
+-   **Fechas, prioridades, recurrencias, búsqueda, filtros y reordenamiento** por arrastre o teclado.
+-   **Deshacer eliminaciones**, agregado rápido con sintaxis de atajos y atajos de teclado.
+-   **Tarjeta de entrenador** con nivel, XP, racha y estuche de 8 medallas.
+-   **Pokédex** con porcentaje total y por región, y **estadísticas** semanales y por categoría.
+-   **PWA**: manifest, iconos y service worker para instalarla y usarla sin conexión.
+-   **Respaldo JSON** de exportación e importación.
+-   **Migración segura desde v5.2 y v5.3**: se conserva todo (las categorías antiguas o desconocidas pasan a una categoría actual en vez de borrarse), se mantiene el nivel y se guarda una copia completa de los datos anteriores en `todomon_backup_v5`. Las claves originales de v5 no se borran.
+-   Se mantiene todo lo corregido en v5.3: cadenas evolutivas verificadas, estado de las tareas al desmarcar, nombres actualizados al evolucionar y sprites animados nítidos.
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Stack tecnológico
 
-Construido con amor y estándares web puros:
+Construido con estándares web puros, sin compilación:
 
--   **HTML5 & CSS3**: Diseño responsivo, animaciones fluidas y variables CSS para temas dinámicos.
--   **Vanilla JavaScript**: Lógica ligera y rápida sin frameworks pesados.
--   **PokeAPI**: La fuente de datos para sprites (incluidos los GIF animados de Gen V), nombres y sonidos.
--   **LocalStorage**: Tus tareas y progreso se guardan automáticamente en tu navegador.
+-   **HTML5, CSS3 y JavaScript** clásico (sin módulos ni frameworks), dividido en `js/data.js`, `js/store.js`, `js/sprites.js`, `js/habitat.js` y `js/app.js`.
+-   **PokeAPI**: sprites animados de Pokémon Negro/Blanco, nombres en español, medallas y gritos.
+-   **localStorage**: tareas, progreso, Pokédex y ajustes se guardan en el navegador (clave `todomon_v6`).
+-   **Service worker** (`sw.js`) para el modo sin conexión.
 
 ## 📄 Licencia
 
